@@ -22,7 +22,7 @@ using namespace std;
 struct sockaddr_in6 server_addr;
 
 void set_server_socket(){
-    server_addr.sin6_familiy = AF_INET6;
+    server_addr.sin6_family = AF_INET6;
     server_addr.sin6_port = htons(SERVER_PORT);
     server_addr.sin6_addr = in6addr_any;
 }
