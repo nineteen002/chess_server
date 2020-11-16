@@ -68,7 +68,8 @@ int acceptClient(int socket) {
     return client;
 }
 
-void readSocket(int client, char buffer[1024]) {
+void readSocket(int client) {
+    char buffer[1024];
     int res = recv(client, buffer, sizeof(buffer),0);
     if(res < 0) {
         cout << "ERROR: No se pudo leer o no hay nada en el buffer" << endl;
@@ -129,7 +130,6 @@ int main(int argc, char* argv[]) {
         }
 
         for(int c = 1; c < totalClients; c++) {
-            char* buffer = new char[1024];
             cout << "Checking if I can read anything..." << endl;
             if(watchedElements[c].revents & POLLIN != 0) {
                 cout << "Reading something";
@@ -137,8 +137,7 @@ int main(int argc, char* argv[]) {
                 cout << " from client " << client;
 
                 //try to read something
-                readSocket(client, buffer);
-                cout << "Trying buffer again " << buffer << endl;
+                readSocket(client);
 
                 watchedElements[c].revents = 0;
                 a = false;
