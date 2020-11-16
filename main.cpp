@@ -106,8 +106,8 @@ int main(int argc, char* argv[]) {
     watchedElements[0].fd  = main_socket;
     watchedElements[0].events = POLLIN;
     watchedElements[0].revents = 0;
-    bool a =true;
-    while(a) {
+    int g = 0
+    while(g < 6) {
         res = poll(watchedElements, totalClients, 100);
 
         if(res > 0) {
@@ -135,16 +135,17 @@ int main(int argc, char* argv[]) {
             if(watchedElements[c].fd == main_socket){
                 acceptClient(main_socket);
             } else {
+                g++;
                 char buffer[1024];
                 int res = recv(client, buffer, sizeof(buffer),0);
                 if(res < 0) {
                     cout << "ERROR: No se pudo leer o no hay nada en el buffer" << endl;
                 } else {
+
                     cout << "Mensaje del cliente " << client << " recibido: " << buffer << endl;
                 }
             }
         }
-        a = false;
     }
 
     close(client);
