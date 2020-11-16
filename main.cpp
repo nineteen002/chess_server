@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
     watchedElements[0].revents = 0;
 
     int g = 0;
-    while(g < 6) {
+    while(g < 50) {
 
         res = poll(watchedElements, totalClients, 100);
 
@@ -136,7 +136,6 @@ int main(int argc, char* argv[]) {
             }
             g++;
         }
-
     }
 
     close(client);
