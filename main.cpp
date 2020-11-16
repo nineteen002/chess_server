@@ -27,6 +27,42 @@ void set_server_socket(){
     server_addr.sin6_addr = in6addr_any;
 }
 
+int bindClient(int clients_socket){
+    int res = bind(clients_socket, (struct sockaddr*)&server_addr, sizeof(server_addr));
+
+    if(res < 0){
+        close(clients_socket);
+        cout << "Error: Bind could not be done correctly, try again" << endl;
+        exit(EXIT_FAILURE);
+    } else{
+        cout << "Binding was done correctly" << endl;
+    }
+    return res;
+}
+
+int listenForClient(int clients_socket){
+    int res = listen(clients_socket, BACKLOG_CLIENTS);
+
+    if(res < 0){
+        close(clients_socket);
+        cout << "ERROR: Listen command could not be executed, try again" << endl;
+        exit(EXIT_FAILURE);
+    } else{
+        cout << "Listening was done correctly! You can now accept conexions.." << endl;
+    }
+    return res;
+}
+
+int acceptClient(int clients_socket){
+    int client = accept(clients_socket, nullptr, nullptr);
+    if(client < 0){
+        cout << "ERROR: Could not accept client" << clients_socket << endl;
+        return -1;
+    } else {
+        cout << "Client accepted successfully" << endl;
+    }
+    return client;
+}
 
 int main(int argc, char* argv[])
 {
@@ -40,34 +76,13 @@ int main(int argc, char* argv[])
     set_server_socket();
 
     //try to bind the socket to the addres and port number
-    res = bind(clients_socket, (struct sockaddr*)&server_addr, sizeof(server_addr));
-
-    if(res < 0){
-        close(clients_socket);
-        cout << "Error de bind" << endl;
-        return -1;
-    } else{
-        cout << "Binding was done correctly" << endl;
-    }
+    bindClient(clients_socket);
 
     //try to listen
-    res = listen(clients_socket, BACKLOG_CLIENTS);
+    listenForClient(clients_socket);
 
-    if(res < 0){
-        close(clients_socket);
-        cout << "Error de listen" << endl;
-        return -1;
-    } else{
-        cout << "Listening was done correctly you can now accept conexions" << endl;
-    }
-
-    int client;
-    client = accept(clients_socket, nullptr, nullptr);
-    if(client < 0){
-        cout << "Error de accept" << endl;
-    } else {
-        cout << "Client accepted successfully" << endl;
-    }
+    //try accepting client
+    int client = acceptClient(clients_socket);
     //try to read something
 
     char buffer[1024];
@@ -77,7 +92,7 @@ int main(int argc, char* argv[])
         cout << "Error al recibir informacion" << endl;
     }
     else{
-        cout << "Mensaje recibido: " << client << res << buffer;
+        cout << "Mensaje recibido: " << buffer;
     }
 
 }
