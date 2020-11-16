@@ -96,19 +96,19 @@ int main(int argc, char* argv[]) {
     //try to listen
     listenForClient(main_socket);
 
-    watchedElements[0].fd  = listeningPort;
+    watchedElements[0].fd  = main_socket;
     watchedElements[0].events = POLLIN;
     watchedElements[0].revents = 0;
 
     while(1) {
         res = poll(watchedElements, totalClients, 100);
 
-        if(watchedElements[0].revents & POLLIN = 0){
+        if(watchedElements[0].revents & POLLIN == 0){
             //try accepting client
             client = acceptClient(main_socket);
             cout << "New client:" << client;
 
-            watchedElements[totalClients].fd  = listeningPort;
+            watchedElements[totalClients].fd  = main_socket;
             watchedElements[totalClients].events = POLLIN;
             watchedElements[totalClients].revents = 0;
             totalClients++;
