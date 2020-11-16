@@ -116,17 +116,19 @@ int main(int argc, char* argv[]) {
 
         cout << "Checking watched elements..." << endl;
         if(watchedElements[0].revents & POLLIN) {
-            cout << "Adding new client:" << client << endl;
-            //try accepting client
-            client = acceptClient(main_socket);
+            if(watchedElements[0].fd == main_socket){
+                cout << "Adding new client:" << client << endl;
+                //try accepting client
+                client = acceptClient(main_socket);
 
-            watchedElements[totalClients].fd  = client;
-            watchedElements[totalClients].events = POLLIN;
-            watchedElements[totalClients].revents = 0;
-            totalClients++;
+                watchedElements[totalClients].fd  = client;
+                watchedElements[totalClients].events = POLLIN;
+                watchedElements[totalClients].revents = 0;
+                totalClients++;
+            }
         }
 
-        for(int c = 0; c < totalClients; c++) {
+        for(int c = 1; c < totalClients; c++) {
             char buffer[1024];
             cout << "Checking if I can read anything..." << endl;
             if(watchedElements[c].revents & POLLIN != 0) {
