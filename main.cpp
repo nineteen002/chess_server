@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
     watchedElements[0].events = POLLIN;
     watchedElements[0].revents = 0;
 
-    while(a) {
+    while(1) {
         res = poll(watchedElements, totalClients, 1000);
 
         if(res > 0) {
