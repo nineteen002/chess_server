@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
     watchedElements[0].revents = 0;
 
     while(1) {
-        res = poll(watchedElements, totalClients, 1000);
+        res = poll(watchedElements, totalClients, 100);
 
         if(res > 0) {
             //cout << "Something occured " << res <<endl;
@@ -138,6 +138,8 @@ int main(int argc, char* argv[]) {
 
                 //try to read something
                 readSocket(client);
+
+                watchedElements[c].revents = 0;
             }
         }
     }
