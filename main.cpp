@@ -106,46 +106,41 @@ int main(int argc, char* argv[]) {
     watchedElements[0].fd  = main_socket;
     watchedElements[0].events = POLLIN;
     watchedElements[0].revents = 0;
+
     int g = 0;
     while(g < 6) {
+
         res = poll(watchedElements, totalClients, 100);
 
-        if(res > 0) {
-            //cout << "Something occured " << res <<endl;
-        }
-        if(res == 0) {
-            //cout << "Nothing happened" << endl;
-        }
         if(res < 0) {
             cout << "ERROR" << endl;
             return -1;
         }
 
-        for(int c = 0; c < totalClients; c++) {
+        if(watchedElements[0].revents & POLLIN == 0){
+            client = accept(main_socket, NULL, NULL)
+            cout << "Llego nuevo cliente" << client << endl;
 
-            if(watchedElements[c].revents == 0){
-                continue;
-            }
+            watchedElements[totalClients].fd = client;
+            watchedElements[totalClients].events = POLLIN;
+            watchedElements[totalClients].revents = 0;
+            totalClients++;
+        }
 
-            if(watchedElements[c].revents != POLLIN){
-                cout << "Error";
-                return -1;
-            }
+        for(int i = 0; i < totalClients; i++){
+            cout << "Client: " << watchedElements[i].fd;
+            cout << " Events: " << watchedElements[i].events;
+            cout << " Revents: " << watchedElements[i].revents;
 
-            if(watchedElements[c].fd == main_socket){
-                acceptClient(main_socket);
-            } else {
-                g++;
-                char buffer[1024];
-                int res = recv(client, buffer, sizeof(buffer),0);
-                if(res < 0) {
-                    cout << "ERROR: No se pudo leer o no hay nada en el buffer" << endl;
-                } else {
+            if((watchedElements[i]&POLLIN) != 0){
+                client = watchedElements[i].fd;
 
-                    cout << "Mensaje del cliente " << client << " recibido: " << buffer << endl;
-                }
+                readSocket(client);
+
+                watchedElements[i].revents = 0;
             }
         }
+
     }
 
     close(client);
