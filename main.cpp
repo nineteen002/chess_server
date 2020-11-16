@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 
     char buffer[1024];
 
-    res = recv(cliente,buffer, sizeof(buffer),0);
+    res = recv(client,buffer, sizeof(buffer),0);
     if(res < 0){
         cout << "Error al recibir informacion" << endl;
     }
