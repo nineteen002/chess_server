@@ -68,7 +68,16 @@ int main(int argc, char* argv[])
     } else {
         cout << "Client accepted successfully" << endl;
     }
-    //try to send something
+    //try to read something
 
+    char buffer[1024];
+
+    res = recv(cliente,buffer, sizeof(buffer),0);
+    if(res < 0){
+        cout << "Error al recibir informacion" << endl;
+    }
+    else{
+        cout << "Mensaje recibido: " << cliente << res << buffer;
+    }
 
 }
