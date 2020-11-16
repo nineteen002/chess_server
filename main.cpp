@@ -129,7 +129,7 @@ int main(int argc, char* argv[]) {
         }
 
         for(int c = 1; c < totalClients; c++) {
-            char buffer = new char[1024];
+            char* buffer = new char[1024];
             cout << "Checking if I can read anything..." << endl;
             if(watchedElements[c].revents & POLLIN != 0) {
                 cout << "Reading something";
