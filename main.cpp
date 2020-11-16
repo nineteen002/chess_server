@@ -142,9 +142,9 @@ int main(int argc, char* argv[]) {
                 } else {
                     cout << "Mensaje del cliente " << client << " recibido: " << buffer << endl;
                 }
-                a = false;
             }
         }
+        a = false;
     }
 
     close(client);
