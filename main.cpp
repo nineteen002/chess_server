@@ -118,13 +118,7 @@ int main(int argc, char* argv[]) {
         }
 
         if(watchedElements[0].revents & POLLIN){
-            client = accept(main_socket, NULL, NULL);
-            cout << "Llego nuevo cliente" << client << endl;
-
-            watchedElements[totalClients].fd = client;
-            watchedElements[totalClients].events = POLLIN;
-            watchedElements[totalClients].revents = 0;
-            totalClients++;
+            acceptClient(main_socket);
         }
 
         for(int i = 0; i < totalClients; i++){
