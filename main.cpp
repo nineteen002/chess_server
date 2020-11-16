@@ -99,33 +99,34 @@ int main(int argc, char* argv[]) {
     watchedElements[0].fd  = main_socket;
     watchedElements[0].events = POLLIN;
     watchedElements[0].revents = 0;
-
-    while(1) {
-        res = poll(watchedElements, totalClients, 100);
+    bool a = true;
+    while(a) {
+        res = poll(watchedElements, totalClients, 1000);
         if(res > 0){
             cout << "Something occured " << res <<endl;
         }
         if(res == 0){
-            cout << "Nothing happened" << endl;
+            //cout << "Nothing happened" << endl;
         }
         if(res < 0){
             cout << "ERROR" << endl;
             return -1;
         }
+        for(int c = 0; c < totalClients; c++){
+            cout << "Checking watched elements" << endl;
+            if(watchedElements[0].revents & POLLIN){
+                //try accepting client
+                client = acceptClient(main_socket);
+                cout << "New client:" << client;
 
-
-        if(watchedElements[0].revents & POLLIN == 0){
-            //try accepting client
-            client = acceptClient(main_socket);
-            cout << "New client:" << client;
-
-            watchedElements[totalClients].fd  = main_socket;
-            watchedElements[totalClients].events = POLLIN;
-            watchedElements[totalClients].revents = 0;
-            totalClients++;
+                watchedElements[totalClients].fd  = main_socket;
+                watchedElements[totalClients].events = POLLIN;
+                watchedElements[totalClients].revents = 0;
+                totalClients++;
+            }
         }
 
-        for(int c = 1; c < totalClients; c++){
+        for(int c = 0; c < totalClients; c++){
             cout << "Checking if I can read anything..." << endl;
             if(watchedElements[c].revents & POLLIN != 0){
                 client = watchedElements[c].fd;
@@ -135,6 +136,7 @@ int main(int argc, char* argv[]) {
                 cout << "Trying buffer again" << buffer << endl;
 
                 watchedElements[c].revents = 0;
+                a = false;
             }
         }
     }
