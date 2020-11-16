@@ -138,9 +138,9 @@ int main(int argc, char* argv[]) {
                 cout << "Trying buffer again " << buffer << endl;
 
                 watchedElements[c].revents = 0;
+                a = false;
             }
         }
-        a = false;
     }
 
     close(client);
