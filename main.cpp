@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
         res = poll(watchedElements, totalClients, 1000);
 
         if(res > 0) {
-            cout << "Something occured " << res <<endl;
+            //cout << "Something occured " << res <<endl;
         }
         if(res == 0) {
             //cout << "Nothing happened" << endl;
