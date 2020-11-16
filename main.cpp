@@ -121,25 +121,28 @@ int main(int argc, char* argv[]) {
             return -1;
         }
 
-        if(watchedElements[0].revents == 0){
-            continue;
-        }
-
-        if(watchedElements[0].revents & POLLIN) {
-            if(watchedElements[0].fd == main_socket) {
-                acceptClient(main_socket);
-            }
-        }
-
         for(int c = 0; c < totalClients; c++) {
-            cout << "Checking if I can read anything..." << endl;
-            if(watchedElements[c].revents & POLLIN != 0) {
-                client = watchedElements[c].fd;
 
-                //try to read something
-                readSocket(client);
+            if(watchedElements[c].revents == 0){
+                continue;
+            }
 
-                watchedElements[c].revents = 0;
+            if(watchedElements[c].revents != POLLIN){
+                cout << "Error";
+                return -1;
+            }
+
+            if(watchedElements[c].fd == main_socket){
+                acceptClient(main_socket);
+            } else {
+
+                char buffer[1024];
+                int res = recv(client, buffer, sizeof(buffer),0);
+                if(res < 0) {
+                    cout << "ERROR: No se pudo leer o no hay nada en el buffer" << endl;
+                } else {
+                    cout << "Mensaje del cliente " << client << " recibido: " << buffer << endl;
+                }
             }
         }
     }
