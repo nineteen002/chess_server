@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
 
         cout << "Checking watched elements..." << endl;
         if(watchedElements[0].revents & POLLIN) {
-            cout << "Adding new client:" << client;
+            cout << "Adding new client:" << client << endl;
             //try accepting client
             client = acceptClient(main_socket);
 
@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
             if(watchedElements[c].revents & POLLIN != 0) {
                 cout << "Reading something";
                 client = watchedElements[c].fd;
-                cout << " from client " << c;
+                cout << " from client " << client;
                 //try to read something
                 readSocket(client, buffer);
                 cout << "Trying buffer again" << buffer << endl;
