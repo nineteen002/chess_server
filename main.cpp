@@ -102,33 +102,31 @@ int main(int argc, char* argv[]) {
     bool a = true;
     while(a) {
         res = poll(watchedElements, totalClients, 1000);
-        if(res > 0){
+        if(res > 0) {
             cout << "Something occured " << res <<endl;
         }
-        if(res == 0){
+        if(res == 0) {
             //cout << "Nothing happened" << endl;
         }
-        if(res < 0){
+        if(res < 0) {
             cout << "ERROR" << endl;
             return -1;
         }
-        for(int c = 0; c < totalClients; c++){
-            cout << "Checking watched elements" << endl;
-            if(watchedElements[0].revents & POLLIN){
-                cout << "Adding new client:" << client;
-                //try accepting clieny
-                client = acceptClient(main_socket);
+        cout << "Checking watched elements" << endl;
+        if(watchedElements[0].revents & POLLIN == 0) {
+            cout << "Adding new client:" << client;
+            //try accepting client
+            client = acceptClient(main_socket);
 
-                watchedElements[totalClients].fd  = main_socket;
-                watchedElements[totalClients].events = POLLIN;
-                watchedElements[totalClients].revents = 0;
-                totalClients++;
-            }
+            watchedElements[totalClients].fd  = main_socket;
+            watchedElements[totalClients].events = POLLIN;
+            watchedElements[totalClients].revents = 0;
+            totalClients++;
         }
 
-        for(int c = 0; c < totalClients; c++){
+        for(int c = 0; c < totalClients; c++) {
             cout << "Checking if I can read anything..." << endl;
-            if(watchedElements[c].revents & POLLIN != 0){
+            if(watchedElements[c].revents & POLLIN != 0) {
                 cout << "Reading something";
                 client = watchedElements[c].fd;
                 cout << " from client " << client;
