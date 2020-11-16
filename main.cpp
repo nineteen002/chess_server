@@ -106,8 +106,8 @@ int main(int argc, char* argv[]) {
     watchedElements[0].fd  = main_socket;
     watchedElements[0].events = POLLIN;
     watchedElements[0].revents = 0;
-
-    while(1) {
+    bool a =true;
+    while(a) {
         res = poll(watchedElements, totalClients, 100);
 
         if(res > 0) {
@@ -135,7 +135,6 @@ int main(int argc, char* argv[]) {
             if(watchedElements[c].fd == main_socket){
                 acceptClient(main_socket);
             } else {
-
                 char buffer[1024];
                 int res = recv(client, buffer, sizeof(buffer),0);
                 if(res < 0) {
@@ -143,6 +142,7 @@ int main(int argc, char* argv[]) {
                 } else {
                     cout << "Mensaje del cliente " << client << " recibido: " << buffer << endl;
                 }
+                a = false;
             }
         }
     }
