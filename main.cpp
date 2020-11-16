@@ -125,18 +125,17 @@ int main(int argc, char* argv[]) {
             if(watchedElements[0].fd == main_socket) {
                 acceptClient(main_socket);
             }
-            else{
-                for(int c = 1; c < totalClients; c++) {
-                    cout << "Checking if I can read anything..." << endl;
-                    if(watchedElements[c].revents & POLLIN != 0) {
-                        client = watchedElements[c].fd;
+        }
 
-                        //try to read something
-                        readSocket(client);
+        for(int c = 0; c < totalClients; c++) {
+            cout << "Checking if I can read anything..." << endl;
+            if(watchedElements[c].revents & POLLIN != 0) {
+                client = watchedElements[c].fd;
 
-                        watchedElements[c].revents = 0;
-                    }
-                }
+                //try to read something
+                readSocket(client);
+
+                watchedElements[c].revents = 0;
             }
         }
     }
