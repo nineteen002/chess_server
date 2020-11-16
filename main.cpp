@@ -70,7 +70,7 @@ int acceptClient(int socket) {
     watchedElements[totalClients].revents = 0;
     totalClients++;
 
-    cout << "New client " << client << " accepted successfully and added to list" << endl;
+    cout << "New client " << new_client << " accepted successfully and added to list" << endl;
 
     return client;
 }
