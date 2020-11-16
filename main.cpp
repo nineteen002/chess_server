@@ -130,15 +130,14 @@ int main(int argc, char* argv[]) {
                 cout << "Inside revents &Pollin != 0" << endl;
                 client = watchedElements[i].fd;
 
-                char buffer[1024];
-                int res = recv(client, buffer, sizeof(buffer),0);
-                if(res < 0) {
-                    cout << "ERROR: No se pudo leer o no hay nada en el buffer" << endl;
-                } else {
-                    cout << "Mensaje del cliente " << client << " recibido: " << buffer << endl;
-                }
+                readSocket(client);
 
                 watchedElements[i].revents = 0;
+                cout << "I = " << i;
+                cout << " Client: " << watchedElements[i].fd;
+                cout << " ,Events: " << watchedElements[i].events;
+                cout << " ,Revents: " << watchedElements[i].revents << endl;
+
             }
             g++;
         }
