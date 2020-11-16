@@ -68,7 +68,7 @@ int acceptClient(int socket) {
     return client;
 }
 
-void readSocket(int client, char* buffer) {
+void readSocket(int client, char buffer[1024]) {
     int res = recv(client, buffer, sizeof(buffer),0);
     if(res < 0) {
         cout << "ERROR: No se pudo leer o no hay nada en el buffer" << endl;
