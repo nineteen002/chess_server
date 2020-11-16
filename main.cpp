@@ -8,11 +8,12 @@
 #include <unistd.h>
 
 #ifdef __WIN32__
-    #include <winsock.h>
-    #include <winsock2.h>
+#include <winsock.h>
+#include <winsock2.h>
 #else
-    #include <sys/socket.h>
-    #include <netinet/in.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/poll.h>
 #endif
 
 #define SERVER_PORT 4994
@@ -21,43 +22,45 @@
 using namespace std;
 
 struct sockaddr_in6 listeningPort;
+struct pollfd watchedElements[6];
+int totalClients = 1;
 
-void set_server_socket(){
+void set_server_socket() {
     listeningPort.sin6_family = AF_INET6;
     listeningPort.sin6_port = htons(SERVER_PORT);
     listeningPort.sin6_addr = in6addr_any;
 }
 
-int bindClient(int clients_socket){
-    int res = bind(clients_socket, (struct sockaddr*)&listeningPort, sizeof(listeningPort));
+int bindClient(int main_socket) {
+    int res = bind(main_socket, (struct sockaddr*)&listeningPort, sizeof(listeningPort));
 
-    if(res < 0){
-        close(clients_socket);
+    if(res < 0) {
+        close(main_socket);
         cout << "Error: Bind could not be done correctly, try again" << endl;
         exit(EXIT_FAILURE);
-    } else{
+    } else {
         cout << "Binding was done correctly" << endl;
     }
     return res;
 }
 
-int listenForClient(int clients_socket){
-    int res = listen(clients_socket, BACKLOG_CLIENTS);
+int listenForClient(int main_socket) {
+    int res = listen(main_socket, BACKLOG_CLIENTS);
 
-    if(res < 0){
-        close(clients_socket);
+    if(res < 0) {
+        close(main_socket);
         cout << "ERROR: Listen command could not be executed, try again" << endl;
         exit(EXIT_FAILURE);
-    } else{
+    } else {
         cout << "Listening was done correctly! You can now accept conexions..." << endl;
     }
     return res;
 }
 
-int acceptClient(int clients_socket){
-    int client = accept(clients_socket, nullptr, nullptr);
-    if(client < 0){
-        cout << "ERROR: Could not accept client" << clients_socket << endl;
+int acceptClient(int main_socket) {
+    int client = accept(main_socket, nullptr, nullptr);
+    if(client < 0) {
+        cout << "ERROR: Could not accept client" << main_socket << endl;
         return -1;
     } else {
         cout << "Client accepted successfully" << endl;
@@ -65,42 +68,66 @@ int acceptClient(int clients_socket){
     return client;
 }
 
-void readSocket(int client, char* buffer){
+void readSocket(int client, char* buffer) {
     int res = recv(client, buffer, sizeof(buffer),0);
-    if(res < 0){
+    if(res < 0) {
         cout << "ERROR: No se pudo leer o no hay nada en el buffer" << endl;
-    }
-    else{
-        cout << "Mensaje recibido: " << buffer;
+    } else {
+        cout << "Mensaje recibido: " << buffer << endl;
     }
 }
 
-int main(int argc, char* argv[])
-{
-    int clients_socket, res;
-    clients_socket = socket(AF_INET6, SOCK_STREAM, 0);
+int main(int argc, char* argv[]) {
+    int main_socket, res, client;
+    char buffer[1024];
 
-    if(clients_socket < 0){
+    //START
+    set_server_socket();
+
+    main_socket = socket(AF_INET6, SOCK_STREAM, 0);
+    if(main_socket < 0) {
+        cout << "ERROR: Could no create main socket" << endl;
         return -1;
     }
 
-    set_server_socket();
-
     //try to bind the socket to the addres and port number
-    bindClient(clients_socket);
+    bindClient(main_socket);
 
     //try to listen
-    listenForClient(clients_socket);
+    listenForClient(main_socket);
 
-    //try accepting client
-    int client = acceptClient(clients_socket);
-    //try to read something
+    watchedElements[0].fd  = listeningPort;
+    watchedElements[0].events = POLLIN;
+    watchedElements[0].revents = 0;
 
-    char buffer[1024];
+    while(1) {
+        res = poll(watchedElements, totalClients, 100);
 
-    readSocket(client, buffer);
-    cout << "Trying buffer again" << buffer;
+        if(watchedElements[0].revents & POLLIN = 0){
+            //try accepting client
+            client = acceptClient(main_socket);
+            cout << "New client:" << client;
+
+            watchedElements[totalClients].fd  = listeningPort;
+            watchedElements[totalClients].events = POLLIN;
+            watchedElements[totalClients].revents = 0;
+            totalClients++;
+        }
+
+        for(int c = 1; c < totalClients; c++){
+            cout << "Checking if I can read anything..." << endl;
+            if(watchedElements[c].revents & POLLIN != 0){
+                client = watchedElements[c].fd;
+
+                //try to read something
+                readSocket(client, buffer);
+                cout << "Trying buffer again" << buffer << endl;
+
+                watchedElements[c].revents = 0;
+            }
+        }
+    }
 
     close(client);
-    close(clients_socket);
+    close(main_socket);
 }
