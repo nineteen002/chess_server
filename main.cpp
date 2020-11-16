@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
 
         cout << "Checking watched elements..." << endl;
         if(watchedElements[0].revents & POLLIN) {
-            if(watchedElements[0].fd == main_socket){
+            if(watchedElements[0].fd == main_socket) {
                 cout << "Adding new client:" << client << endl;
                 //try accepting client
                 client = acceptClient(main_socket);
@@ -134,10 +134,15 @@ int main(int argc, char* argv[]) {
             if(watchedElements[c].revents & POLLIN != 0) {
                 cout << "Reading something";
                 client = watchedElements[c].fd;
-                cout << " from client " << client;
+                cout << " from client " << client << endl;
+
                 //try to read something
-                readSocket(client, buffer);
-                cout << "Trying buffer again " << buffer << endl;
+                int res = recv(client, buffer, sizeof(buffer),0);
+                if(res < 0) {
+                    cout << "ERROR: No se pudo leer o no hay nada en el buffer" << endl;
+                } else {
+                    cout << "Mensaje recibido: " << buffer << endl;
+                }
 
                 watchedElements[c].revents = 0;
                 a = false;
