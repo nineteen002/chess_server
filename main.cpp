@@ -102,6 +102,17 @@ int main(int argc, char* argv[]) {
 
     while(1) {
         res = poll(watchedElements, totalClients, 100);
+        if(res > 0){
+            cout << "Something occured " << res <<endl;
+        }
+        if(res == 0){
+            cout << "Nothing happened" << endl;
+        }
+        if(res < 0){
+            cout << "ERROR" << endl;
+            return -1;
+        }
+
 
         if(watchedElements[0].revents & POLLIN == 0){
             //try accepting client
