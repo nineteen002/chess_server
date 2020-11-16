@@ -72,7 +72,7 @@ int acceptClient(int socket) {
 
     cout << "New client " << new_client << " accepted successfully and added to list" << endl;
 
-    return client;
+    return new_client;
 }
 
 void readSocket(int client) {
