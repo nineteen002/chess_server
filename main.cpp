@@ -31,11 +31,11 @@ void set_server_socket() {
     listeningPort.sin6_addr = in6addr_any;
 }
 
-int bindClient(int main_socket) {
-    int res = bind(main_socket, (struct sockaddr*)&listeningPort, sizeof(listeningPort));
+int bindClient(int socket) {
+    int res = bind(socket, (struct sockaddr*)&listeningPort, sizeof(listeningPort));
 
     if(res < 0) {
-        close(main_socket);
+        close(socket);
         cout << "Error: Bind could not be done correctly, try again" << endl;
         exit(EXIT_FAILURE);
     } else {
@@ -44,11 +44,11 @@ int bindClient(int main_socket) {
     return res;
 }
 
-int listenForClient(int main_socket) {
-    int res = listen(main_socket, BACKLOG_CLIENTS);
+int listenForClient(int socket) {
+    int res = listen(socket, BACKLOG_CLIENTS);
 
     if(res < 0) {
-        close(main_socket);
+        close(socket);
         cout << "ERROR: Listen command could not be executed, try again" << endl;
         exit(EXIT_FAILURE);
     } else {
@@ -57,10 +57,10 @@ int listenForClient(int main_socket) {
     return res;
 }
 
-int acceptClient(int main_socket) {
-    int client = accept(main_socket, nullptr, nullptr);
+int acceptClient(int socket) {
+    int client = accept(socket, nullptr, nullptr);
     if(client < 0) {
-        cout << "ERROR: Could not accept client" << main_socket << endl;
+        cout << "ERROR: Could not accept client" << socket << endl;
         return -1;
     } else {
         cout << "Client accepted successfully" << endl;
@@ -100,8 +100,10 @@ int main(int argc, char* argv[]) {
     watchedElements[0].events = POLLIN;
     watchedElements[0].revents = 0;
     bool a = true;
+
     while(a) {
         res = poll(watchedElements, totalClients, 1000);
+
         if(res > 0) {
             cout << "Something occured " << res <<endl;
         }
@@ -112,13 +114,14 @@ int main(int argc, char* argv[]) {
             cout << "ERROR" << endl;
             return -1;
         }
-        cout << "Checking watched elements" << endl;
+
+        cout << "Checking watched elements..." << endl;
         if(watchedElements[0].revents & POLLIN == 0) {
             cout << "Adding new client:" << client;
             //try accepting client
             client = acceptClient(main_socket);
 
-            watchedElements[totalClients].fd  = main_socket;
+            watchedElements[totalClients].fd  = client;
             watchedElements[totalClients].events = POLLIN;
             watchedElements[totalClients].revents = 0;
             totalClients++;
@@ -129,7 +132,7 @@ int main(int argc, char* argv[]) {
             if(watchedElements[c].revents & POLLIN != 0) {
                 cout << "Reading something";
                 client = watchedElements[c].fd;
-                cout << " from client " << client;
+                cout << " from client " << c;
                 //try to read something
                 readSocket(client, buffer);
                 cout << "Trying buffer again" << buffer << endl;
