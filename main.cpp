@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
         }
 
         if(watchedElements[0].revents & POLLIN == 0){
-            client = accept(main_socket, NULL, NULL)
+            client = accept(main_socket, NULL, NULL);
             cout << "Llego nuevo cliente" << client << endl;
 
             watchedElements[totalClients].fd = client;
@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
             cout << " Events: " << watchedElements[i].events;
             cout << " Revents: " << watchedElements[i].revents;
 
-            if((watchedElements[i]&POLLIN) != 0){
+            if((watchedElements[i].revents &POLLIN) != 0){
                 client = watchedElements[i].fd;
 
                 readSocket(client);
