@@ -17,18 +17,19 @@
 
 #define SERVER_PORT 4994
 #define BACKLOG_CLIENTS 6
+
 using namespace std;
 
-struct sockaddr_in6 server_addr;
+struct sockaddr_in6 listeningPort;
 
 void set_server_socket(){
-    server_addr.sin6_family = AF_INET6;
-    server_addr.sin6_port = htons(SERVER_PORT);
-    server_addr.sin6_addr = in6addr_any;
+    listeningPort.sin6_family = AF_INET6;
+    listeningPort.sin6_port = htons(SERVER_PORT);
+    listeningPort.sin6_addr = in6addr_any;
 }
 
 int bindClient(int clients_socket){
-    int res = bind(clients_socket, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    int res = bind(clients_socket, (struct sockaddr*)&listeningPort, sizeof(listeningPort));
 
     if(res < 0){
         close(clients_socket);
@@ -48,7 +49,7 @@ int listenForClient(int clients_socket){
         cout << "ERROR: Listen command could not be executed, try again" << endl;
         exit(EXIT_FAILURE);
     } else{
-        cout << "Listening was done correctly! You can now accept conexions.." << endl;
+        cout << "Listening was done correctly! You can now accept conexions..." << endl;
     }
     return res;
 }
@@ -62,6 +63,16 @@ int acceptClient(int clients_socket){
         cout << "Client accepted successfully" << endl;
     }
     return client;
+}
+
+void readSocket(int client, char* buffer){
+    int res = recv(client, buffer, sizeof(buffer),0);
+    if(res < 0){
+        cout << "ERROR: No se pudo leer o no hay nada en el buffer" << endl;
+    }
+    else{
+        cout << "Mensaje recibido: " << buffer;
+    }
 }
 
 int main(int argc, char* argv[])
@@ -87,12 +98,9 @@ int main(int argc, char* argv[])
 
     char buffer[1024];
 
-    res = recv(client,buffer, sizeof(buffer),0);
-    if(res < 0){
-        cout << "Error al recibir informacion" << endl;
-    }
-    else{
-        cout << "Mensaje recibido: " << buffer;
-    }
+    readSocket(client, buffer);
+    cout << "Trying buffer again" << buffer;
 
+    close(client);
+    close(clients_socket);
 }
