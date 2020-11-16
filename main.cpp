@@ -39,23 +39,36 @@ int main(int argc, char* argv[])
 
     set_server_socket();
 
-    //try to binf the socket to the addres and port number
+    //try to bind the socket to the addres and port number
     res = bind(clients_socket, (struct sockaddr*)&server_addr, sizeof(server_addr));
 
     if(res < 0){
         close(clients_socket);
         cout << "Error de bind" << endl;
         return -1;
+    } else{
+        cout << "Binding was done correctly" << endl;
     }
 
-    //try to lisnte
+    //try to listen
     res = listen(clients_socket, BACKLOG_CLIENTS);
 
-        if(res < 0){
+    if(res < 0){
         close(clients_socket);
         cout << "Error de listen" << endl;
         return -1;
+    } else{
+        cout << "Listening was done correctly you can now accept conexions" << endl;
     }
+
+    int client;
+    client = accept(clients_socket, nullptr, nullptr);
+    if(client < 0){
+        cout << "Error de accept" << endl;
+    } else {
+        cout << "Client accepted successfully" << endl;
+    }
+    //try to send something
 
 
 }
