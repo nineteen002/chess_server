@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
             return -1;
         }
 
-        if(watchedElements[0].revents & POLLIN == 0){
+        if(watchedElements[0].revents & POLLIN){
             client = accept(main_socket, NULL, NULL);
             cout << "Llego nuevo cliente" << client << endl;
 
@@ -128,9 +128,10 @@ int main(int argc, char* argv[]) {
         }
 
         for(int i = 0; i < totalClients; i++){
-            cout << "Client: " << watchedElements[i].fd;
-            cout << " Events: " << watchedElements[i].events;
-            cout << " Revents: " << watchedElements[i].revents;
+            cout << "I = " << i;
+            cout << " Client: " << watchedElements[i].fd;
+            cout << " ,Events: " << watchedElements[i].events;
+            cout << " ,Revents: " << watchedElements[i].revents << endl;
 
             if((watchedElements[i].revents &POLLIN) != 0){
                 client = watchedElements[i].fd;
@@ -139,6 +140,7 @@ int main(int argc, char* argv[]) {
 
                 watchedElements[i].revents = 0;
             }
+            g++;
         }
 
     }
