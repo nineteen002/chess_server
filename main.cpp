@@ -58,14 +58,14 @@ int listenForClient(int socket) {
 }
 
 int acceptClient(int socket) {
-    int client = accept(socket, nullptr, nullptr);
+    int new_client = accept(socket, nullptr, nullptr);
 
-    if(client < 0) {
+    if(new_client < 0) {
         cout << "ERROR: Could not accept client" << socket << endl;
         return -1;
     }
 
-    watchedElements[totalClients].fd  = client;
+    watchedElements[totalClients].fd  = new_client;
     watchedElements[totalClients].events = POLLIN;
     watchedElements[totalClients].revents = 0;
     totalClients++;
@@ -121,6 +121,10 @@ int main(int argc, char* argv[]) {
             return -1;
         }
 
+        if(watchedElements[0].revents == 0){
+            continue;
+        }
+
         if(watchedElements[0].revents & POLLIN) {
             if(watchedElements[0].fd == main_socket) {
                 acceptClient(main_socket);
@@ -134,8 +138,6 @@ int main(int argc, char* argv[]) {
 
                 //try to read something
                 readSocket(client);
-
-                watchedElements[c].revents = 0;
             }
         }
     }
