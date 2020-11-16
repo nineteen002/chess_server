@@ -103,12 +103,11 @@ int main(int argc, char* argv[]) {
     //try to listen
     listenForClient(main_socket);
 
-    watchedElements[0].fd  = main_socket;
-    watchedElements[0].events = POLLIN;
-    watchedElements[0].revents = 0;
-
     int g = 0;
     while(g < 50) {
+        watchedElements[0].fd  = main_socket;
+        watchedElements[0].events = POLLIN;
+        watchedElements[0].revents = 0;
 
         res = poll(watchedElements, totalClients, 100);
 
@@ -128,8 +127,8 @@ int main(int argc, char* argv[]) {
             cout << " ,Revents: " << watchedElements[i].revents << endl;
 
             if((watchedElements[i].revents &POLLIN) != 0){
+                cout << "Inside revents &Pollin != 0" << endl;
                 client = watchedElements[i].fd;
-
                 readSocket(client);
 
                 watchedElements[i].revents = 0;
