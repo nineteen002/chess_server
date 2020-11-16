@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
         cout << "Error al recibir informacion" << endl;
     }
     else{
-        cout << "Mensaje recibido: " << cliente << res << buffer;
+        cout << "Mensaje recibido: " << client << res << buffer;
     }
 
 }
