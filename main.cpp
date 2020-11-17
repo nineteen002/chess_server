@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
     listenForClient(main_socket);
 
     int g = 0;
-    while(1) {
+    while(g < 100) {
         watchedElements[0].fd  = main_socket;
         watchedElements[0].events = POLLIN;
         watchedElements[0].revents = 0;
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
         }
 
         //ACCEPT CLIENT AND ADD TO WATCHED ELEMENTS
-        if(watchedElements[0].revents & POLLIN){
+        if(watchedElements[0].revents & POLLIN) {
             acceptClient(main_socket);
 
             /*
@@ -130,22 +130,23 @@ int main(int argc, char* argv[]) {
             send(client, buffer, cadena.length(),0);*/
         }
 
-        for(int i = 0; i < totalClients; i++){
+        for(int i = 0; i < totalClients; i++) {
             //cout << "I = " << i;
             //cout << " Client: " << watchedElements[i].fd;
             //cout << " ,Events: " << watchedElements[i].events;
             //cout << " ,Revents: " << watchedElements[i].revents << endl;
 
-            if((watchedElements[i].revents &POLLIN) != 0){
+            if((watchedElements[i].revents &POLLIN) != 0) {
                 client = watchedElements[i].fd;
 
                 //readSocket(client);
                 char buffer[1024];
-                if(recv(client, buffer, sizeof(buffer),0) < 0){
+                if(recv(client, buffer, sizeof(buffer),0) < 0) {
                     cout << "Error de recv" << endl;
+                } else {
+                    cout << "Data received "<< buffer << endl;
+                    bzero((char*)&buffer,sizeof(buffer));
                 }
-                cout << "Data received "<< buffer << endl;
-                bzero((char*)&buffer,sizeof(buffer));
 
                 watchedElements[i].revents = 0;
                 //cout << " ,Revents: " << watchedElements[i].revents << endl;
