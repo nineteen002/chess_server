@@ -116,8 +116,16 @@ int main(int argc, char* argv[]) {
             return -1;
         }
 
+        //ACCEPT CLIENT AND ADD TO WATCHED ELEMENTS
         if(watchedElements[0].revents & POLLIN){
             acceptClient(main_socket);
+
+            client = watchedElements[totalClients-1].fd;
+            //TRY SENDING DATA
+            char buffer[1024];
+            char* cadena = "Bienvenido a Chess World mtherfker";
+            strncpy(Buffer, cad, strlen(cad));
+            send(client, buffer, strlen(cad));
         }
 
         /*
