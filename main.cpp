@@ -141,7 +141,7 @@ int main(int argc, char* argv[]) {
 
                 //readSocket(client);
                 char buffer[1024];
-                if(recv(client, buffer, sizeof(buffer),0) < 0) {
+                if(read(client, buffer, sizeof(buffer),0) < 0) {
                     cout << "Error de recv" << endl;
                 } else {
                     cout << "Data received "<< buffer << endl;
