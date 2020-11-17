@@ -32,6 +32,12 @@ void set_server_socket() {
     listeningPort.sin6_addr = in6addr_any;
 }
 
+void set_watched_array() {
+    watchedElements[0].fd  = main_socket;
+    watchedElements[0].events = POLLIN;
+    watchedElements[0].revents = 0;
+}
+
 int bindClient(int socket) {
     int res = bind(socket, (struct sockaddr*)&listeningPort, sizeof(listeningPort));
 
@@ -78,13 +84,21 @@ int acceptClient(int socket) {
 
 void readSocket(int client) {
     char buffer[1024];
-    int n = recv(client, buffer, sizeof(buffer),0);
-    if(n < 0) {
-        cout << "Error de recv" << endl;
+    int res = recv(client, buffer, sizeof(buffer),0);
+    if(res < 0) {
+        cout << "ERROR: Could not receive data from client " << client << endl;
     } else if(n > 0) {
-        cout << "Data received "<< buffer << endl;
+        cout << "Data received: " << buffer << endl;
         bzero((char*)&buffer,sizeof(buffer));
     }
+}
+
+void sendDataToClient(int client) {
+    //TRY SENDING DATA
+    char buffer[1024];
+    string cadena = "Bienvenido a Chess World mtherfker";
+    strcpy(buffer, cadena.c_str());
+    send(client, buffer, cadena.length(),0);*/
 }
 
 int main(int argc, char* argv[]) {
@@ -92,6 +106,8 @@ int main(int argc, char* argv[]) {
 
     //START
     set_server_socket();
+
+    //TODO: RESOLUCION DNS
 
     main_socket = socket(AF_INET6, SOCK_STREAM, 0);
     if(main_socket < 0) {
@@ -106,48 +122,34 @@ int main(int argc, char* argv[]) {
     listenForClient(main_socket);
 
     while(1) {
-        watchedElements[0].fd  = main_socket;
-        watchedElements[0].events = POLLIN;
-        watchedElements[0].revents = 0;
+        set_watched_array();
 
         res = poll(watchedElements, totalClients, 100);
-
         if(res < 0) {
-            cout << "ERROR" << endl;
+            cout << "ERROR: Poll could not be done properlly" << endl;
             return -1;
         }
 
         //ACCEPT CLIENT AND ADD TO WATCHED ELEMENTS
         if(watchedElements[0].revents & POLLIN) {
             acceptClient(main_socket);
-
-            /*
-            client = watchedElements[totalClients-1].fd;
-            //TRY SENDING DATA
-            char buffer[1024];
-            string cadena = "Bienvenido a Chess World mtherfker";
-            strcpy(buffer, cadena.c_str());
-            send(client, buffer, cadena.length(),0);*/
+            sendDataToClient(watchedElements[totalClients-1].fd);
         }
-
+        //CHECK EACH ELEMENT IN LIST TO SEE IF THERE IS SOMETHING TO READ
         for(int i = 0; i < totalClients; i++) {
-            //cout << "I = " << i;
-            //cout << " Client: " << watchedElements[i].fd;
-            //cout << " ,Events: " << watchedElements[i].events;
-            //cout << " ,Revents: " << watchedElements[i].revents << endl;
-
             if((watchedElements[i].revents &POLLIN) != 0) {
                 client = watchedElements[i].fd;
-
                 readSocket(client);
-
                 watchedElements[i].revents = 0;
-                //cout << " ,Revents: " << watchedElements[i].revents << endl;
-
             }
         }
+
+        //TO DO: REMOVE ELEMENT FROM ARRAY WHEN CONEXION CLOSES2
     }
 
     close(client);
     close(main_socket);
+    return 0;
 }
+
+
