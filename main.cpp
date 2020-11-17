@@ -76,8 +76,8 @@ int acceptClient(int socket) {
 }
 
 void readSocket(int client) {
-    char buffer[1024];
-    int res = recv(client, buffer, sizeof(buffer),0);
+    vector<char> buffer(1024);
+    int res = recv(client, buffer.data(), buffer.size(),0);
     if(res < 0) {
         cout << "ERROR: No se pudo leer o no hay nada en el buffer" << endl;
     } else {
@@ -120,15 +120,15 @@ int main(int argc, char* argv[]) {
         if(watchedElements[0].revents & POLLIN){
             acceptClient(main_socket);
 
+            /*
             client = watchedElements[totalClients-1].fd;
             //TRY SENDING DATA
             char buffer[1024];
             string cadena = "Bienvenido a Chess World mtherfker";
             strcpy(buffer, cadena.c_str());
-            send(client, buffer, cadena.length(),0);
+            send(client, buffer, cadena.length(),0);*/
         }
 
-        /*
         for(int i = 0; i < totalClients; i++){
             //cout << "I = " << i;
             //cout << " Client: " << watchedElements[i].fd;
