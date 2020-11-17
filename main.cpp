@@ -81,9 +81,7 @@ void readSocket(int client) {
     int n = recv(client, buffer, sizeof(buffer),0);
     if(n < 0) {
         cout << "Error de recv" << endl;
-    } else if(n == 0) {
-        cout << "no data";
-    } else {
+    } else if(n > 0) {
         cout << "Data received "<< buffer << endl;
         bzero((char*)&buffer,sizeof(buffer));
     }
