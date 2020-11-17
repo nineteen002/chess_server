@@ -75,8 +75,6 @@ int acceptClient(int socket) {
     return new_client;
 }
 
-void in
-
 void readSocket(int client) {
     char buffer[1024];
     int res = recv(client, buffer, sizeof(buffer),0);
