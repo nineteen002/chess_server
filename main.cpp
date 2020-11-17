@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
             //TRY SENDING DATA
             char buffer[1024];
             char* cadena = "Bienvenido a Chess World mtherfker";
-            strncpy(buffer, cadena, strlen(cadena));
+            strncpy(buffer, cadena, strlen(cadena), 0);
             send(client, buffer, strlen(cadena));
         }
 
