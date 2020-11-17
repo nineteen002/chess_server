@@ -123,9 +123,9 @@ int main(int argc, char* argv[]) {
             client = watchedElements[totalClients-1].fd;
             //TRY SENDING DATA
             char buffer[1024];
-            char* cadena = 'Bienvenido a Chess World mtherfker';
-            strncpy(buffer, cadena, strlen(cadena));
-            send(client, buffer, strlen(cadena),0);
+            string cadena = "Bienvenido a Chess World mtherfker";
+            strcpy(buffer, cadena.c_str());
+            send(client, buffer, cadena.length(),0);
         }
 
         /*
