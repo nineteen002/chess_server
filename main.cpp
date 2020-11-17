@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -81,7 +82,7 @@ void readSocket(int client) {
     if(res < 0) {
         cout << "ERROR: No se pudo leer o no hay nada en el buffer" << endl;
     } else {
-        cout << "Mensaje del cliente " << client << " recibido: " << buffer << endl;
+        cout << "Mensaje del cliente " << client << " recibido: " << buffer.data() << endl;
     }
 }
 
@@ -147,7 +148,6 @@ int main(int argc, char* argv[]) {
             }
             g++;
         }
-        */
     }
 
     close(client);
