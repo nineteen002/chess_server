@@ -78,11 +78,14 @@ int acceptClient(int socket) {
 
 void readSocket(int client) {
     char buffer[1024];
-    int res = recv(client, buffer, sizeof(buffer),0);
-    if(res < 0) {
-        cout << "ERROR: No se pudo leer o no hay nada en el buffer" << endl;
+    int n = recv(client, buffer, sizeof(buffer),0);
+    if(n < 0) {
+        cout << "Error de recv" << endl;
+    } else if(n == 0) {
+        cout << "no data";
     } else {
-        cout << "Mensaje del cliente " << client << " recibido: " << buffer << endl;
+        cout << "Data received "<< buffer << endl;
+        bzero((char*)&buffer,sizeof(buffer));
     }
 }
 
@@ -104,8 +107,7 @@ int main(int argc, char* argv[]) {
     //try to listen
     listenForClient(main_socket);
 
-    int g = 0;
-    while(g < 100) {
+    while(1) {
         watchedElements[0].fd  = main_socket;
         watchedElements[0].events = POLLIN;
         watchedElements[0].revents = 0;
@@ -139,25 +141,12 @@ int main(int argc, char* argv[]) {
             if((watchedElements[i].revents &POLLIN) != 0) {
                 client = watchedElements[i].fd;
 
-                //readSocket(client);
-                char buffer[1024];
-                int n = recv(client, buffer, sizeof(buffer),0);
-                if(n < 0) {
-                    cout << "Error de recv" << endl;
-                }
-                else if(n == 0){
-                    cout << "no data";
-                }
-                else {
-                    cout << "Data received "<< buffer << endl;
-                    bzero((char*)&buffer,sizeof(buffer));
-                }
+                readSocket(client);
 
                 watchedElements[i].revents = 0;
                 //cout << " ,Revents: " << watchedElements[i].revents << endl;
 
             }
-            g++;
         }
     }
 
