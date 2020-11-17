@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
     listenForClient(main_socket);
 
     int g = 0;
-    while(g < 1000) {
+    while(1) {
         watchedElements[0].fd  = main_socket;
         watchedElements[0].events = POLLIN;
         watchedElements[0].revents = 0;
