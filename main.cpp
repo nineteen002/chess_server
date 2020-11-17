@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <vector>
+#include <strings.h>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -77,12 +77,12 @@ int acceptClient(int socket) {
 }
 
 void readSocket(int client) {
-    vector<char> buffer(1024);
-    int res = recv(client, buffer.data(), buffer.size(),0);
+    char buffer[1024];
+    int res = recv(client, buffer, sizeof(buffer),0);
     if(res < 0) {
         cout << "ERROR: No se pudo leer o no hay nada en el buffer" << endl;
     } else {
-        cout << "Mensaje del cliente " << client << " recibido: " << buffer.data() << endl;
+        cout << "Mensaje del cliente " << client << " recibido: " << buffer << endl;
     }
 }
 
@@ -137,10 +137,15 @@ int main(int argc, char* argv[]) {
             //cout << " ,Revents: " << watchedElements[i].revents << endl;
 
             if((watchedElements[i].revents &POLLIN) != 0){
-                //cout << "Inside revents &Pollin != 0" << endl;
                 client = watchedElements[i].fd;
 
-                readSocket(client);
+                //readSocket(client);
+                char buffer[1024];
+                if(recv(client, buffer, sizeof(buffer),0) < 0){
+                    cout << "Error de recv" << endl;
+                }
+                cout << "Data received "<< buffer << endl;
+                bzero((char*)&buffer,sizeof(buffer));
 
                 watchedElements[i].revents = 0;
                 //cout << " ,Revents: " << watchedElements[i].revents << endl;
