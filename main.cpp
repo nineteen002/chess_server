@@ -75,6 +75,8 @@ int acceptClient(int socket) {
     return new_client;
 }
 
+void in
+
 void readSocket(int client) {
     char buffer[1024];
     int res = recv(client, buffer, sizeof(buffer),0);
@@ -104,7 +106,7 @@ int main(int argc, char* argv[]) {
     listenForClient(main_socket);
 
     int g = 0;
-    while(g < 50) {
+    while(g < 1000) {
         watchedElements[0].fd  = main_socket;
         watchedElements[0].events = POLLIN;
         watchedElements[0].revents = 0;
@@ -121,22 +123,19 @@ int main(int argc, char* argv[]) {
         }
 
         for(int i = 0; i < totalClients; i++){
-            cout << "I = " << i;
-            cout << " Client: " << watchedElements[i].fd;
-            cout << " ,Events: " << watchedElements[i].events;
-            cout << " ,Revents: " << watchedElements[i].revents << endl;
+            //cout << "I = " << i;
+            //cout << " Client: " << watchedElements[i].fd;
+            //cout << " ,Events: " << watchedElements[i].events;
+            //cout << " ,Revents: " << watchedElements[i].revents << endl;
 
             if((watchedElements[i].revents &POLLIN) != 0){
-                cout << "Inside revents &Pollin != 0" << endl;
+                //cout << "Inside revents &Pollin != 0" << endl;
                 client = watchedElements[i].fd;
 
                 readSocket(client);
 
                 watchedElements[i].revents = 0;
-                cout << "I = " << i;
-                cout << " Client: " << watchedElements[i].fd;
-                cout << " ,Events: " << watchedElements[i].events;
-                cout << " ,Revents: " << watchedElements[i].revents << endl;
+                //cout << " ,Revents: " << watchedElements[i].revents << endl;
 
             }
             g++;
