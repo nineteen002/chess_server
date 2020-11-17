@@ -120,6 +120,7 @@ int main(int argc, char* argv[]) {
             acceptClient(main_socket);
         }
 
+        /*
         for(int i = 0; i < totalClients; i++){
             //cout << "I = " << i;
             //cout << " Client: " << watchedElements[i].fd;
@@ -138,6 +139,7 @@ int main(int argc, char* argv[]) {
             }
             g++;
         }
+        */
     }
 
     close(client);
