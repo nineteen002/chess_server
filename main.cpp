@@ -141,10 +141,14 @@ int main(int argc, char* argv[]) {
 
                 //readSocket(client);
                 char buffer[1024];
-                int n = read(client, buffer, sizeof(buffer);
+                int n = recv(client, buffer, sizeof(buffer),0);
                 if(n < 0) {
                     cout << "Error de recv" << endl;
-                } else {
+                }
+                else if(n == 0){
+                    cout << "no data";
+                }
+                else {
                     cout << "Data received "<< buffer << endl;
                     bzero((char*)&buffer,sizeof(buffer));
                 }
