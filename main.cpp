@@ -32,7 +32,7 @@ void set_server_socket() {
     listeningPort.sin6_addr = in6addr_any;
 }
 
-void set_watched_array() {
+void set_watched_array(int main_socket) {
     watchedElements[0].fd  = main_socket;
     watchedElements[0].events = POLLIN;
     watchedElements[0].revents = 0;
@@ -98,7 +98,7 @@ void sendDataToClient(int client) {
     char buffer[1024];
     string cadena = "Bienvenido a Chess World mtherfker";
     strcpy(buffer, cadena.c_str());
-    send(client, buffer, cadena.length(),0);*/
+    send(client, buffer, cadena.length(),0);
 }
 
 int main(int argc, char* argv[]) {
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
     listenForClient(main_socket);
 
     while(1) {
-        set_watched_array();
+        set_watched_array(main_socket);
 
         res = poll(watchedElements, totalClients, 100);
         if(res < 0) {
