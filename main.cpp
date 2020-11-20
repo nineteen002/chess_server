@@ -101,6 +101,23 @@ void sendDataToClient(int client) {
     send(client, buffer, cadena.length(),0);
 }
 
+void addNewClientToWatchedList(int main_socket) {
+    acceptClient(main_socket);
+    sendDataToClient(watchedElements[totalClients-1].fd);
+}
+
+void checkClientListForSomethingToRead() {
+    int client;
+
+    for(int i = 0; i < totalClients; i++) {
+        if((watchedElements[i].revents &POLLIN) != 0) {
+            client = watchedElements[i].fd;
+            readSocket(client);
+            watchedElements[i].revents = 0;
+        }
+    }
+}
+
 int main(int argc, char* argv[]) {
     int main_socket, res, client;
 
@@ -132,17 +149,11 @@ int main(int argc, char* argv[]) {
 
         //ACCEPT CLIENT AND ADD TO WATCHED ELEMENTS
         if(watchedElements[0].revents & POLLIN) {
-            acceptClient(main_socket);
-            sendDataToClient(watchedElements[totalClients-1].fd);
+            addNewClientToWatchedList(main_socket);
         }
+
         //CHECK EACH ELEMENT IN LIST TO SEE IF THERE IS SOMETHING TO READ
-        for(int i = 0; i < totalClients; i++) {
-            if((watchedElements[i].revents &POLLIN) != 0) {
-                client = watchedElements[i].fd;
-                readSocket(client);
-                watchedElements[i].revents = 0;
-            }
-        }
+        checkClientListForSomethingToRead();
 
         //TO DO: REMOVE ELEMENT FROM ARRAY WHEN CONEXION CLOSES2
     }
