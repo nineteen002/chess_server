@@ -98,6 +98,7 @@ void readSocket(int client) {
 
 void sendDataToClient(int client) {
     //TRY SENDING DATA
+    string cadena;
     char buffer[1024];
     buffer[0] = 1;
     buffer[1] = 170;
