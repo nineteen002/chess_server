@@ -101,7 +101,7 @@ void sendDataToClient(int client) {
     char buffer[1024];
     buffer[0] = 1;
     buffer[1] = 170;
-    strcpy(buffer, cadena.c_str());
+    strcpy(cadena.c_str(), buffer);
     send(client, buffer, cadena.length(),0);
 }
 
