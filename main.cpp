@@ -25,6 +25,7 @@ using namespace std;
 struct sockaddr_in6 listeningPort;
 struct pollfd watchedElements[6];
 int totalClients = 1;
+int numeroSala = 0;
 
 void set_server_socket() {
     listeningPort.sin6_family = AF_INET6;
@@ -90,13 +91,16 @@ void readSocket(int client) {
     } else if(res > 0) {
         cout << "Data received: " << buffer << endl;
         bzero((char*)&buffer,sizeof(buffer));
+    } else if(res == 0) {
+        cout << "Se cerro cliente" << client << endl;
     }
 }
 
 void sendDataToClient(int client) {
     //TRY SENDING DATA
     char buffer[1024];
-    string cadena = "Bienvenido a Chess World mtherfker";
+    buffer[0] = 1;
+    buffer[1] = 170;
     strcpy(buffer, cadena.c_str());
     send(client, buffer, cadena.length(),0);
 }
