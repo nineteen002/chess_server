@@ -102,8 +102,7 @@ void sendDataToClient(int client) {
     char buffer[1024];
     buffer[0] = 1;
     buffer[1] = 170;
-    strcpy(cadena.c_str(), buffer);
-    send(client, buffer, cadena.length(),0);
+    send(client, buffer, sizeof(buffer),0);
 }
 
 void addNewClientToWatchedList(int main_socket) {
