@@ -88,12 +88,20 @@ void readSocket(int client) {
     int res = recv(client, buffer, sizeof(buffer),0);
     if(res < 0) {
         cout << "ERROR: Could not receive data from client " << client << endl;
+        return -1;
     } else if(res > 0) {
         cout << "Data received: " << buffer << endl;
         bzero((char*)&buffer,sizeof(buffer));
+        return 1;
     } else if(res == 0) {
         cout << "Se cerro cliente" << client << endl;
+        return 0;
     }
+}
+
+void closeClientConnection(int client_index){
+    cout << "Client that closed connection is " << watchedElements[i].fd;
+    cout << "Last element on the list" << watchedElements[totalClients].fd;
 }
 
 void sendDataToClient(int client) {
@@ -102,6 +110,7 @@ void sendDataToClient(int client) {
     char buffer[1024];
     buffer[0] = 1;
     buffer[1] = 170;
+    buffer[2] = '\r\n';
     send(client, buffer, sizeof(buffer),0);
 }
 
@@ -112,11 +121,13 @@ void addNewClientToWatchedList(int main_socket) {
 
 void checkClientListForSomethingToRead() {
     int client;
-
+    int closeClient;
     for(int i = 0; i < totalClients; i++) {
         if((watchedElements[i].revents &POLLIN) != 0) {
             client = watchedElements[i].fd;
-            readSocket(client);
+            if(readSocket(client) == 0){ //cierre de conexion
+                closeClientConnection(i);
+            }
             watchedElements[i].revents = 0;
         }
     }
@@ -147,12 +158,13 @@ int main(int argc, char* argv[]) {
 
         res = poll(watchedElements, totalClients, 100);
         if(res < 0) {
-            cout << "ERROR: Poll could not be done properlly" << endl;
+            cout << "ERROR: Poll could not be done properly" << endl;
             return -1;
         }
 
         //ACCEPT CLIENT AND ADD TO WATCHED ELEMENTS
         if(watchedElements[0].revents & POLLIN) {
+            cout << "New event happened" << endl;
             addNewClientToWatchedList(main_socket);
         }
 
