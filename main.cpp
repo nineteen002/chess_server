@@ -101,7 +101,17 @@ int readSocket(int client) {
 
 void closeClientConnection(int client_index){
     cout << "Client that closed connection is " << watchedElements[client_index].fd;
-    cout << "Last element on the list" << watchedElements[totalClients].fd;
+    cout << "Last element on the list" << watchedElements[totalClients-1].fd;
+    if(totalClients == 1){
+        close(watchedElements[client_index].fd);
+        totalClients--;
+    } else {
+        close(watchedElements[client_index].fd);
+
+        watchedElements[client_index].fd  = watchedElements[totalClients-1].fd;
+        watchedElements[client_index].events =  watchedElements[totalClients-1].events;
+        watchedElements[client_index].revents = watchedElements[totalClients-1].revents;
+    }
 }
 
 void sendDataToClient(int client) {
