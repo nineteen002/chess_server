@@ -83,7 +83,7 @@ int acceptClient(int socket) {
     return new_client;
 }
 
-void readSocket(int client) {
+int readSocket(int client) {
     char buffer[1024];
     int res = recv(client, buffer, sizeof(buffer),0);
     if(res < 0) {
@@ -100,7 +100,7 @@ void readSocket(int client) {
 }
 
 void closeClientConnection(int client_index){
-    cout << "Client that closed connection is " << watchedElements[i].fd;
+    cout << "Client that closed connection is " << watchedElements[client_index].fd;
     cout << "Last element on the list" << watchedElements[totalClients].fd;
 }
 
