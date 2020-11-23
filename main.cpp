@@ -143,6 +143,10 @@ void closeGameConnection(int sala) {
 }
 
 void closeClientConnection(int client_index) {
+    for(int i = 0; i < 6; i++){
+        cout << salaDeCliente[client_index-1] << ", ";
+    }
+    cout << endl;
     int sala = salaDeCliente[client_index-1];
     cout << "Sala del cliente es " << sala;
 
