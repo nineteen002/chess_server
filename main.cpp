@@ -121,6 +121,8 @@ int readSocket(int client) {
     }
 }
 
+void closeClientConnection(int);
+
 void closeGameConnection(int client_index) {
     int sala = salaDeCliente[client_index];
     int oponent_index, oponent_fd;
@@ -163,7 +165,7 @@ void closeClientConnection(int client_index) {
 
 void addNewClientToWatchedList(int main_socket) {
     acceptClient(main_socket);
-    sendDataToClient(watchedElements[totalClients-1].fd);
+    sendDataToClient(watchedElements[totalClients-1].fd, "Welcome to ChessWorld!");
 }
 
 void checkClientListForSomethingToRead() {
