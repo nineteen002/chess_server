@@ -85,7 +85,7 @@ void addClientToSala() {
         salaDeCliente[totalClients-1] = numeroSala;
     }
     for(int i = 0; i < 6; i++){
-        cout << salaDeCliente[client_index-1] << ", ";
+        cout << salaDeCliente[i] << ", ";
     }
     cout << endl;
 }
@@ -104,7 +104,7 @@ int acceptClient(int socket) {
 
     cout << "New client " << new_client << " accepted" << endl;
     for(int i = 0; i < 6; i++){
-        cout << salaDeCliente[client_index-1] << ", ";
+        cout << salaDeCliente[i] << ", ";
     }
     cout << endl;
     addClientToSala();
@@ -151,7 +151,7 @@ void closeGameConnection(int sala) {
         closeClientConnection(oponentIndexInWatchedElements);
     }
     for(int i = 0; i < 6; i++){
-        cout << salaDeCliente[client_index-1] << ", ";
+        cout << salaDeCliente[i] << ", ";
     }
     cout << endl;
 }
