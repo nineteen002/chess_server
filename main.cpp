@@ -74,7 +74,7 @@ void sendDataToClient(int client) {
     //buffer[2] = '\r\n';
     cadena = "Welcome to chessworld";
     strcpy(buffer, cadena.c_str());
-    cout <<"Sending " << buffer << " of size " << sizeof(buffer) << endl;
+    cout <<"Sending " << buffer << " of size " << sizeof(cadena) << endl;
     send(client, buffer, sizeof(cadena.c_str()),0);
 }
 
