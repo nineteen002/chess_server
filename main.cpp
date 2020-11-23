@@ -67,15 +67,10 @@ int listenForClient(int socket) {
 
 void sendDataToClient(int client) {
     //TRY SENDING DATA
-    string cadena;
-    char buffer[1024];
-    //buffer[0] = 1;
-    //buffer[1] = 170;
-    //buffer[2] = '\r\n';
-    cadena = "Welcome to chessworld";
-    strcpy(buffer, cadena.c_str());
-    cout <<"Sending " << buffer << " of size " << sizeof(cadena) << endl;
-    send(client, buffer, sizeof(cadena.c_str()),0);
+    char* buffer = "Welcome to chessworld";
+
+    cout <<"Sending " << buffer << " of size " << (int)strlen(buffer) << endl;
+    send(client, buffer,(int)strlen(buffer),0);
 }
 
 int acceptClient(int socket) {
