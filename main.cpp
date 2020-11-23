@@ -68,18 +68,16 @@ int listenForClient(int socket) {
     return res;
 }
 
-void sendDataToClient(int client) {
+void sendDataToClient(int client, char* buffer) {
     //TRY SENDING DATA
-    char* buffer = "Welcome to chessworld";
-
-    cout <<"Sending " << buffer << " of size " << (int)strlen(buffer) << endl;
+    cout <<"Sending data to client" << client << endl;
     send(client, buffer,(int)strlen(buffer),0);
 }
 
-void addClientToSala(){
-    if(historyClient%2 == 0){
+void addClientToSala() {
+    if(historyClient%2 == 0) {
         numeroSala++;
-        cout << "Salas completas, creando nueva sala" << numeroSala << endl;
+        cout << "Creando nueva sala " << numeroSala << endl;
         salaDeCliente[totalClients-1] = numeroSala;
     } else {
         cout << "Agregando cliente a sala " << numeroSala << endl;
@@ -100,7 +98,7 @@ int acceptClient(int socket) {
     watchedElements[totalClients].revents = 0;
     totalClients++;
 
-    cout << "New client " << new_client << " accepted successfully and added to list" << endl;
+    cout << "New client " << new_client << " accepted" << endl;
     addClientToSala();
     historyClient++;
 
@@ -123,10 +121,30 @@ int readSocket(int client) {
     }
 }
 
-void closeClientConnection(int client_index){
-    cout << "Client that closed connection is " << watchedElements[client_index].fd;
-    cout << "Last element on the list" << watchedElements[totalClients-1].fd;
-    if(totalClients == 1){
+void closeGameConnection(int client_index) {
+    int sala = salaDeCliente[client_index];
+    int oponent_index, oponent_fd;
+
+    oponent_index = -1;
+    salaDeCliente[client_index] = salaDeCliente[totalClients-1];
+
+    for(int i = 0; i < 6; i++) {
+        if(salaDeCliente[i] == sala) {
+            oponent_index = i+1;
+            oponent_fd = watchedElements[oponent_index].fd;
+            cout << "The oponent is " << oponent_fd << endl;
+        }
+    }
+    if(oponent_index > 0) {
+        char* buffer = "Your oponent left.. closing connection";
+        sendDataToClient(oponent_fd, buffer);
+        closeClientConnection(oponent_fd);
+    }
+}
+
+void closeClientConnection(int client_index) {
+    cout << "Client " << watchedElements[client_index].fd << " closed connection" << endl;
+    if(totalClients == 1) {
         close(watchedElements[client_index].fd);
         totalClients--;
         salaDeCliente[0] = 0;
@@ -136,6 +154,8 @@ void closeClientConnection(int client_index){
         watchedElements[client_index].fd  = watchedElements[totalClients-1].fd;
         watchedElements[client_index].events =  watchedElements[totalClients-1].events;
         watchedElements[client_index].revents = watchedElements[totalClients-1].revents;
+
+        closeGameConnection(client_index);
     }
 
     //TO DO: DELETE OTHER CLIENT IN SALA
@@ -153,7 +173,7 @@ void checkClientListForSomethingToRead() {
     for(int i = 0; i < totalClients; i++) {
         if((watchedElements[i].revents &POLLIN) != 0) {
             client = watchedElements[i].fd;
-            if(readSocket(client) == 0){ //cierre de conexion
+            if(readSocket(client) == 0) { //cierre de conexion
                 closeClientConnection(i);
             }
             watchedElements[i].revents = 0;
