@@ -123,12 +123,10 @@ int readSocket(int client) {
 
 void closeClientConnection(int);
 
-void closeGameConnection(int client_index) {
-    int sala = salaDeCliente[client_index];
+void closeGameConnection(int sala) {
     int oponent_index, oponent_fd;
 
     oponent_index = -1;
-    salaDeCliente[client_index] = salaDeCliente[totalClients-1];
 
     for(int i = 0; i < 6; i++) {
         if(salaDeCliente[i] == sala) {
@@ -145,6 +143,7 @@ void closeGameConnection(int client_index) {
 }
 
 void closeClientConnection(int client_index) {
+    int sala = salaDeCliente[client_index-1];
     cout << "Client " << watchedElements[client_index].fd << " closed connection" << endl;
     if(totalClients == 1) {
         close(watchedElements[client_index].fd);
@@ -157,7 +156,9 @@ void closeClientConnection(int client_index) {
         watchedElements[client_index].events =  watchedElements[totalClients-1].events;
         watchedElements[client_index].revents = watchedElements[totalClients-1].revents;
 
-        closeGameConnection(client_index);
+        salaDeCliente[client_index-1] = salaDeCliente[totalClients-1];
+        totalClients--;
+        closeGameConnection(sala);
     }
 
     //TO DO: DELETE OTHER CLIENT IN SALA
