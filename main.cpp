@@ -75,6 +75,7 @@ void sendDataToClient(int client, char* buffer) {
 }
 
 void addClientToSala() {
+
     if((historyClient%2) == 0) {
         numeroSala++;
         cout << "Creando nueva sala " << numeroSala << endl;
@@ -83,6 +84,10 @@ void addClientToSala() {
         cout << "Agregando cliente a sala " << numeroSala << endl;
         salaDeCliente[totalClients-1] = numeroSala;
     }
+    for(int i = 0; i < 6; i++){
+        cout << salaDeCliente[client_index-1] << ", ";
+    }
+    cout << endl;
 }
 
 int acceptClient(int socket) {
@@ -98,6 +103,10 @@ int acceptClient(int socket) {
     watchedElements[totalClients].revents = 0;
 
     cout << "New client " << new_client << " accepted" << endl;
+    for(int i = 0; i < 6; i++){
+        cout << salaDeCliente[client_index-1] << ", ";
+    }
+    cout << endl;
     addClientToSala();
     totalClients++;
     historyClient++;
@@ -124,6 +133,7 @@ int readSocket(int client) {
 void closeClientConnection(int);
 
 void closeGameConnection(int sala) {
+
     int oponentIndexInWatchedElements, oponent_fd;
 
     oponentIndexInWatchedElements = -1;
@@ -140,6 +150,10 @@ void closeGameConnection(int sala) {
         sendDataToClient(oponent_fd, buffer);
         closeClientConnection(oponentIndexInWatchedElements);
     }
+    for(int i = 0; i < 6; i++){
+        cout << salaDeCliente[client_index-1] << ", ";
+    }
+    cout << endl;
 }
 
 void closeClientConnection(int client_index) {
