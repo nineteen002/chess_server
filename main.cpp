@@ -74,7 +74,7 @@ void sendDataToClient(int client) {
     //buffer[2] = '\r\n';
     cadena = "Welcome to chessworld";
     strcpy(buffer, cadena.c_str());
-    cout << buffer << endl;
+    cout <<"Sending " << buffer << " of size " << sizeof(buffer) << endl;
     send(client, buffer, sizeof(cadena.c_str()),0);
 }
 
@@ -92,8 +92,6 @@ int acceptClient(int socket) {
     totalClients++;
 
     cout << "New client " << new_client << " accepted successfully and added to list" << endl;
-    //sendDataToClient(new_client);
-    cout << "Sending data" << endl;
     return new_client;
 }
 
