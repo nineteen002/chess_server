@@ -25,6 +25,8 @@ using namespace std;
 struct sockaddr_in6 listeningPort;
 struct pollfd watchedElements[6];
 int totalClients = 1;
+
+int salaDeCliente[6];
 int numeroSala = 0;
 
 void set_server_socket() {
@@ -87,7 +89,24 @@ int acceptClient(int socket) {
     totalClients++;
 
     cout << "New client " << new_client << " accepted successfully and added to list" << endl;
+    addClientToSala
     return new_client;
+}
+
+void addClientToSala(){
+    if(numeroSala%2 == 0){
+        numeroSala++;
+        cout << "Salas completas, creando nueva sala" << numeroSala << endl;
+        salaDeCliente[totalClients-1] = numeroSala;
+    } else {
+        cout << "Agregando cliente a sala " << numeroSala << endl;
+        salaDeCliente[totalClients-1] = numeroSala;
+    }
+}
+
+void checkIfClientIsFirstOnGame(){
+    int numberOfGames = (totalClients-1)/2;
+    if(totalClients-1)
 }
 
 int readSocket(int client) {
