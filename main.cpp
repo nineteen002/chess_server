@@ -65,6 +65,18 @@ int listenForClient(int socket) {
     return res;
 }
 
+void sendDataToClient(int client) {
+    //TRY SENDING DATA
+    string cadena;
+    char buffer[1024];
+    //buffer[0] = 1;
+    //buffer[1] = 170;
+    //buffer[2] = '\r\n';
+    cadena = "Welcome to chessworld";
+    strcpy(buffer, cadena.c_str());
+    send(client, buffer, sizeof(cadena.c_str()),0);
+}
+
 int acceptClient(int socket) {
     int new_client = accept(socket, nullptr, nullptr);
 
@@ -79,7 +91,8 @@ int acceptClient(int socket) {
     totalClients++;
 
     cout << "New client " << new_client << " accepted successfully and added to list" << endl;
-
+    sendDataToClient(new_client);
+    cout << "Sending data" << endl;
     return new_client;
 }
 
@@ -112,16 +125,6 @@ void closeClientConnection(int client_index){
         watchedElements[client_index].events =  watchedElements[totalClients-1].events;
         watchedElements[client_index].revents = watchedElements[totalClients-1].revents;
     }
-}
-
-void sendDataToClient(int client) {
-    //TRY SENDING DATA
-    string cadena;
-    char buffer[1024];
-    buffer[0] = 1;
-    buffer[1] = 170;
-    buffer[2] = '\r\n';
-    send(client, buffer, sizeof(buffer),0);
 }
 
 void addNewClientToWatchedList(int main_socket) {
