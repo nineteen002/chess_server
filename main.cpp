@@ -99,10 +99,11 @@ int acceptClient(int socket) {
     watchedElements[totalClients].events = POLLIN;
     watchedElements[totalClients].revents = 0;
     totalClients++;
-    historyClient++;
 
     cout << "New client " << new_client << " accepted successfully and added to list" << endl;
     addClientToSala();
+    historyClient++;
+
     return new_client;
 }
 
