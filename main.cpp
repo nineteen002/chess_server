@@ -25,6 +25,7 @@ using namespace std;
 struct sockaddr_in6 listeningPort;
 struct pollfd watchedElements[6];
 int totalClients = 1;
+int historyClient = 0;
 
 int salaDeCliente[6];
 int numeroSala = 0;
@@ -76,7 +77,7 @@ void sendDataToClient(int client) {
 }
 
 void addClientToSala(){
-    if(numeroSala%2 == 0){
+    if(historyClient%2 == 0){
         numeroSala++;
         cout << "Salas completas, creando nueva sala" << numeroSala << endl;
         salaDeCliente[totalClients-1] = numeroSala;
@@ -98,6 +99,7 @@ int acceptClient(int socket) {
     watchedElements[totalClients].events = POLLIN;
     watchedElements[totalClients].revents = 0;
     totalClients++;
+    historyClient++;
 
     cout << "New client " << new_client << " accepted successfully and added to list" << endl;
     addClientToSala();
@@ -126,6 +128,7 @@ void closeClientConnection(int client_index){
     if(totalClients == 1){
         close(watchedElements[client_index].fd);
         totalClients--;
+        salaDeCliente[0] = 0;
     } else {
         close(watchedElements[client_index].fd);
 
@@ -133,6 +136,8 @@ void closeClientConnection(int client_index){
         watchedElements[client_index].events =  watchedElements[totalClients-1].events;
         watchedElements[client_index].revents = watchedElements[totalClients-1].revents;
     }
+
+    //TO DO: DELETE OTHER CLIENT IN SALA
 }
 
 void addNewClientToWatchedList(int main_socket) {
