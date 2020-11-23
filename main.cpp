@@ -134,7 +134,7 @@ void addNewClientToWatchedList(int main_socket) {
 }
 
 void checkClientListForSomethingToRead() {
-    cout << "Checking list for something to read" << endl;
+    //cout << "Checking list for something to read" << endl;
     int client;
     int closeClient;
     for(int i = 0; i < totalClients; i++) {
