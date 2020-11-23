@@ -100,7 +100,7 @@ int acceptClient(int socket) {
     totalClients++;
 
     cout << "New client " << new_client << " accepted successfully and added to list" << endl;
-    addClientToSala
+    addClientToSala();
     return new_client;
 }
 
