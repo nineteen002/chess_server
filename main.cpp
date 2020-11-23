@@ -104,11 +104,6 @@ void addClientToSala(){
     }
 }
 
-void checkIfClientIsFirstOnGame(){
-    int numberOfGames = (totalClients-1)/2;
-    if(totalClients-1)
-}
-
 int readSocket(int client) {
     char buffer[1024];
     int res = recv(client, buffer, sizeof(buffer),0);
