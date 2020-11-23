@@ -75,6 +75,17 @@ void sendDataToClient(int client) {
     send(client, buffer,(int)strlen(buffer),0);
 }
 
+void addClientToSala(){
+    if(numeroSala%2 == 0){
+        numeroSala++;
+        cout << "Salas completas, creando nueva sala" << numeroSala << endl;
+        salaDeCliente[totalClients-1] = numeroSala;
+    } else {
+        cout << "Agregando cliente a sala " << numeroSala << endl;
+        salaDeCliente[totalClients-1] = numeroSala;
+    }
+}
+
 int acceptClient(int socket) {
     int new_client = accept(socket, nullptr, nullptr);
 
@@ -91,17 +102,6 @@ int acceptClient(int socket) {
     cout << "New client " << new_client << " accepted successfully and added to list" << endl;
     addClientToSala
     return new_client;
-}
-
-void addClientToSala(){
-    if(numeroSala%2 == 0){
-        numeroSala++;
-        cout << "Salas completas, creando nueva sala" << numeroSala << endl;
-        salaDeCliente[totalClients-1] = numeroSala;
-    } else {
-        cout << "Agregando cliente a sala " << numeroSala << endl;
-        salaDeCliente[totalClients-1] = numeroSala;
-    }
 }
 
 int readSocket(int client) {
