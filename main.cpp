@@ -28,7 +28,7 @@ int totalClients = 1;
 int historyClient = 0;
 
 int salaDeCliente[6] = {0,0,0,0,0,0};
-int numeroSala = 1;
+int numeroSala = 0;
 
 void set_server_socket() {
     listeningPort.sin6_family = AF_INET6;
@@ -124,21 +124,21 @@ int readSocket(int client) {
 void closeClientConnection(int);
 
 void closeGameConnection(int sala) {
-    int oponent_index, oponent_fd;
+    int oponentIndexInWatchedElements, oponent_fd;
 
     oponent_index = -1;
 
     for(int i = 0; i < 6; i++) {
         if(salaDeCliente[i] == sala) {
-            oponent_index = i+1;
-            oponent_fd = watchedElements[oponent_index].fd;
+            oponentIndexInWatchedElements = i+1;
+            oponent_fd = watchedElements[oponentIndexInWatchedElements].fd;
             cout << "The oponent is " << oponent_fd << endl;
         }
     }
-    if(oponent_index > 0) {
+    if(oponentIndexInWatchedElements > 0) {
         char* buffer = "Your oponent left.. closing connection";
         sendDataToClient(oponent_fd, buffer);
-        closeClientConnection(oponent_fd);
+        closeClientConnection(oponentIndexInWatchedElements);
     }
 }
 
