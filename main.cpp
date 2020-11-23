@@ -75,7 +75,7 @@ void sendDataToClient(int client, char* buffer) {
 }
 
 void addClientToSala() {
-    if(historyClient%2 == 0) {
+    if((historyClient%2) == 0) {
         numeroSala++;
         cout << "Creando nueva sala " << numeroSala << endl;
         salaDeCliente[totalClients-1] = numeroSala;
@@ -96,10 +96,10 @@ int acceptClient(int socket) {
     watchedElements[totalClients].fd  = new_client;
     watchedElements[totalClients].events = POLLIN;
     watchedElements[totalClients].revents = 0;
-    totalClients++;
 
     cout << "New client " << new_client << " accepted" << endl;
     addClientToSala();
+    totalClients++;
     historyClient++;
 
     return new_client;
