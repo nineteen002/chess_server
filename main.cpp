@@ -126,7 +126,7 @@ void closeClientConnection(int);
 void closeGameConnection(int sala) {
     int oponentIndexInWatchedElements, oponent_fd;
 
-    oponent_index = -1;
+    oponentIndexInWatchedElements = -1;
 
     for(int i = 0; i < 6; i++) {
         if(salaDeCliente[i] == sala) {
