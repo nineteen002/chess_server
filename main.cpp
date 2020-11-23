@@ -27,8 +27,8 @@ struct pollfd watchedElements[6];
 int totalClients = 1;
 int historyClient = 0;
 
-int salaDeCliente[6];
-int numeroSala = 0;
+int salaDeCliente[6] = {0,0,0,0,0,0};
+int numeroSala = 1;
 
 void set_server_socket() {
     listeningPort.sin6_family = AF_INET6;
@@ -144,6 +144,8 @@ void closeGameConnection(int sala) {
 
 void closeClientConnection(int client_index) {
     int sala = salaDeCliente[client_index-1];
+    cout << "Sala del cliente es " << sala;
+
     cout << "Client " << watchedElements[client_index].fd << " closed connection" << endl;
     if(totalClients == 1) {
         close(watchedElements[client_index].fd);
@@ -157,6 +159,7 @@ void closeClientConnection(int client_index) {
         watchedElements[client_index].revents = watchedElements[totalClients-1].revents;
 
         salaDeCliente[client_index-1] = salaDeCliente[totalClients-1];
+        salaDeCliente[totalClients-1] = 0;
         totalClients--;
         closeGameConnection(sala);
     }
