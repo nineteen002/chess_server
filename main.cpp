@@ -68,7 +68,7 @@ int listenForClient(int socket) {
 void sendDataToClient(int client) {
     //TRY SENDING DATA
     string cadena;
-    char buffer[cadena.size()+1];
+    char buffer[1024];
     //buffer[0] = 1;
     //buffer[1] = 170;
     //buffer[2] = '\r\n';
