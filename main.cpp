@@ -92,7 +92,7 @@ int acceptClient(int socket) {
     totalClients++;
 
     cout << "New client " << new_client << " accepted successfully and added to list" << endl;
-    sendDataToClient(new_client);
+    //sendDataToClient(new_client);
     cout << "Sending data" << endl;
     return new_client;
 }
@@ -134,6 +134,7 @@ void addNewClientToWatchedList(int main_socket) {
 }
 
 void checkClientListForSomethingToRead() {
+    cout << "Checking list for something to read" << endl;
     int client;
     int closeClient;
     for(int i = 0; i < totalClients; i++) {
