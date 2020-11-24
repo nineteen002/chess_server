@@ -155,7 +155,7 @@ void processDataRecieved(string buffer, int client){
     cout << "Name of client " << client << " is: " << nameOfUser << endl;
 
     if(typeOfPackage == '0'){
-        managePackageTypeZero(lengthOfNameInt, nameOfUser, client);
+        //managePackageTypeZero(lengthOfNameInt, nameOfUser, client);
     }
 }
 
