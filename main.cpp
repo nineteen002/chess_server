@@ -114,6 +114,28 @@ int acceptClient(int socket) {
     return new_client;
 }
 
+void processDataRecieved(char* buffer){
+    cout << "Buffer es: " << buffer;
+    char typeOfPackage, lengthOfName, rsvd;
+    string nameOfUser;
+    int lengthOfNameInt;
+
+    typeOfPackage = buffer[0];
+    rsvd = buffer[1]
+    lengthOfName = buffer[2];
+    lengthOfNameInt = (int)lengthOfNameInt;
+    rsvd = buffer[3];
+
+    for(int i = 4; i < 4+lengthOfNameInt; i++){
+        typeOfPackage += buffer[i];
+    }
+
+    cout << "Type of package: " << typeOfPackage << endl;
+    cout << "Lenght of Name in char: " << lengthOfName << endl;
+    cout << "Lenght of Name in int: " << lengthOfNameInt << endl;
+    cout << " Name in char: " << nameOfUser << endl;
+}
+
 int readSocket(int client) {
     char buffer[1024];
     int res = recv(client, buffer, sizeof(buffer),0);
