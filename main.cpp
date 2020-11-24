@@ -123,7 +123,7 @@ void processDataRecieved(string buffer){
     typeOfPackage = buffer[0];
     rsvd = buffer[1];
     lengthOfName = buffer[2];
-    lengthOfNameInt = lengthOfName+'0';
+    lengthOfNameInt = lengthOfName;
     rsvd = buffer[3];
 
     for(int i = 4; i < 4+lengthOfNameInt; i++){
