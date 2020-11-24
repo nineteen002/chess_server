@@ -114,7 +114,7 @@ int acceptClient(int socket) {
     return new_client;
 }
 
-void processDataRecieved(char* buffer){
+void processDataRecieved(string buffer){
     cout << "Buffer es: " << buffer;
     char typeOfPackage, lengthOfName, rsvd;
     string nameOfUser;
@@ -123,7 +123,7 @@ void processDataRecieved(char* buffer){
     typeOfPackage = buffer[0];
     rsvd = buffer[1];
     lengthOfName = buffer[2];
-    lengthOfNameInt = atoi(lengthOfNameInt);
+    lengthOfNameInt = (int)(lengthOfName);
     rsvd = buffer[3];
 
     for(int i = 4; i < 4+lengthOfNameInt; i++){
@@ -137,14 +137,17 @@ void processDataRecieved(char* buffer){
 }
 
 int readSocket(int client) {
-    char buffer[1024];
+    char *buffer = new char[1024];
+    string buffer1;
     int res = recv(client, buffer, sizeof(buffer),0);
     if(res < 0) {
         cout << "ERROR: Could not receive data from client " << client << endl;
         return -1;
     } else if(res > 0) {
         cout << "Data received: " << buffer << endl;
-        processDataRecieved(buffer);
+        buffer1 = buffer;
+        processDataRecieved(buffer1);
+
         bzero((char*)&buffer,sizeof(buffer));
         return 1;
     } else if(res == 0) {
