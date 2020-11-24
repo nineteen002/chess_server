@@ -121,7 +121,7 @@ void processDataRecieved(char* buffer){
     int lengthOfNameInt;
 
     typeOfPackage = buffer[0];
-    rsvd = buffer[1]
+    rsvd = buffer[1];
     lengthOfName = buffer[2];
     lengthOfNameInt = (int)lengthOfNameInt;
     rsvd = buffer[3];
@@ -144,7 +144,7 @@ int readSocket(int client) {
         return -1;
     } else if(res > 0) {
         cout << "Data received: " << buffer << endl;
-        processDataRecieved();
+        processDataRecieved(buffer);
         bzero((char*)&buffer,sizeof(buffer));
         return 1;
     } else if(res == 0) {
