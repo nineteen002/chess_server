@@ -130,7 +130,7 @@ void processDataRecieved(string buffer){
     rsvd = newBuffer[3];
 
     for(int i = 4; i < 4+lengthOfNameInt; i++){
-        typeOfPackage += buffer[i];
+        nameOfUser += buffer[i];
     }
 
     cout << "Type of package: " << typeOfPackage << endl;
