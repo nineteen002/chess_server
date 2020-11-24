@@ -115,7 +115,7 @@ int acceptClient(int socket) {
 }
 
 void processDataRecieved(string buffer){
-    cout << "Buffer es: " << buffer;
+    cout << "Buffer es: " << buffer << endl;
     char typeOfPackage, lengthOfName, rsvd;
     string nameOfUser;
     int lengthOfNameInt;
@@ -123,7 +123,7 @@ void processDataRecieved(string buffer){
     typeOfPackage = buffer[0];
     rsvd = buffer[1];
     lengthOfName = buffer[2];
-    lengthOfNameInt = (int)(lengthOfName);
+    lengthOfNameInt = lengthOfName+'0';
     rsvd = buffer[3];
 
     for(int i = 4; i < 4+lengthOfNameInt; i++){
