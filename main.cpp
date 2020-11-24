@@ -123,7 +123,7 @@ void processDataRecieved(char* buffer){
     typeOfPackage = buffer[0];
     rsvd = buffer[1];
     lengthOfName = buffer[2];
-    lengthOfNameInt = (int)lengthOfNameInt;
+    lengthOfNameInt = atoi(lengthOfNameInt);
     rsvd = buffer[3];
 
     for(int i = 4; i < 4+lengthOfNameInt; i++){
