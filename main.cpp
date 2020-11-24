@@ -144,6 +144,7 @@ int readSocket(int client) {
         return -1;
     } else if(res > 0) {
         cout << "Data received: " << buffer << endl;
+        processDataRecieved();
         bzero((char*)&buffer,sizeof(buffer));
         return 1;
     } else if(res == 0) {
