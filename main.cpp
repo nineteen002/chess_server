@@ -113,8 +113,28 @@ int acceptClient(int socket) {
 
     return new_client;
 }
+/*
+void managePackageTypeZero(int sizeOfName, string name, int client){
+    int clientIndex, oponentIndex;
+    for(int i = 0; i < totalClients; i++){
+        if(watchedElements[i] == client){
+            clientIndex = i;
+            break;
+        }
+    }
 
-void processDataRecieved(string buffer){
+    int sala = salaDeCliente[clientIndex-1];
+    cout << "La sala del cliente es: " << sala << endl;
+    for(int i = 0; i < totalClients; i++){
+        if(salaDeCliente[i] == sala){
+            oponentIndex = i+1;
+        }
+    }
+    int oponent = watchedElements[oponentIndex];
+    sendDataToClient(oponent, name.c_str());
+}*/
+
+void processDataRecieved(string buffer, int client){
     char newBuffer[1024];
     strcpy(newBuffer, buffer.c_str());
     cout << "Buffer es: " << newBuffer << endl;
@@ -132,24 +152,24 @@ void processDataRecieved(string buffer){
     for(int i = 4; i < 4+lengthOfNameInt; i++){
         nameOfUser += buffer[i];
     }
+    cout << "Name of client " << client << " is: " << nameOfUser << endl;
 
-    cout << "Type of package: " << typeOfPackage << endl;
-    cout << "Lenght of Name in char: " << lengthOfName << endl;
-    cout << "Lenght of Name in int: " << lengthOfNameInt << endl;
-    cout << " Name in char: " << nameOfUser << endl;
+    if(typeOfPackage == '0'){
+        managePackageTypeZero(lengthOfNameInt, nameOfUser, client);
+    }
 }
 
 int readSocket(int client) {
     char *buffer = new char[1024];
-    string buffer1;
     int res = recv(client, buffer, sizeof(buffer),0);
+    string buffer1 = buffer;
     if(res < 0) {
         cout << "ERROR: Could not receive data from client " << client << endl;
         return -1;
     } else if(res > 0) {
         cout << "Data received: " << buffer << endl;
         buffer1 = buffer;
-        processDataRecieved(buffer1);
+        processDataRecieved(buffer1, client);
 
         bzero((char*)&buffer,sizeof(buffer));
         return 1;
