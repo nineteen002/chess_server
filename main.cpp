@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <list>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -23,23 +24,142 @@
 using namespace std;
 
 struct sockaddr_in6 listeningPort;
-struct pollfd watchedElements[6];
+struct pollfd watchedElements[BACKLOG_CLIENTS+1];
 int totalClients = 1;
 int historyClient = 0;
-
-int salaDeCliente[6] = {0,0,0,0,0,0};
 int numeroSala = 0;
+int historySala = 1;
 
-void set_server_socket() {
+enum {
+    STATE_INITIAL_CONNECTION = 0,
+    STATE_WAITING_IN_GAME,
+    STATE_PLAYING_GAME,
+    STATE_GAME_ENDED
+};
+
+class Client;
+class Game;
+
+class Client{
+    public:
+        int fd;
+        int name_length;
+        char username[100]; 
+        int state;
+        int team;
+        Game* sala;
+};
+
+class Game{
+    public:
+        Client* white;
+        Client* black;
+        int num_sala;
+};
+
+Client* clientList[BACKLOG_CLIENTS+1];
+Game* salas[BACKLOG_CLIENTS/2];
+
+//Setup
+void setServerSocket();
+void initializeLists();
+void setWatchedArray(int);
+int bindClient(int);
+int listenForClient(int);
+
+//To send
+void sendDataToClient(int, char*);
+
+//Add new client
+void addNewClientToWatchedList(int);
+int acceptClient(int);
+void addClient(int);
+void addClientToSala(Client*);
+void addWhiteToNewGame(Client*);
+void addBlackToExistingGame(Client*);
+
+//To Read
+void checkClientListForSomethingToRead();
+int readSocket(Client*);
+void processDataRecieved(string, Client*);
+
+//Close conection
+void closeClientConnection(int);
+void closeOpponentConnection(Client*);
+void closeGameConnection(Game*);
+
+//Search functions
+Game* searchForClientsGame(int);
+int searchForClientInList(int fd);
+int searchForSalaInList(Game*);
+
+//PackagesssEsesesss
+void conectionToGame(Client*);
+void startGame(Client*, Client*);
+void readUsernamePackage(Client*, string);
+void readChesspieceMovement(Client*, string);
+
+int main(int argc, char* argv[]) {
+    int main_socket, res, client;
+
+    //START
+    setServerSocket();
+    initializeLists();
+
+    //TODO: RESOLUCION DNS
+
+    main_socket = socket(AF_INET6, SOCK_STREAM, 0);
+    if(main_socket < 0) {
+        cout << "ERROR: Could no create main socket" << endl;
+        return -1;
+    }
+
+    //try to bind socket
+    bindClient(main_socket);
+
+    //try to listen
+    listenForClient(main_socket);
+
+    while(1) {
+        setWatchedArray(main_socket);
+
+        res = poll(watchedElements, totalClients, 100);
+        if(res < 0) {
+            cout << "ERROR: Poll could not be done properly" << endl;
+            return -1;
+        }
+
+        //ACCEPT CLIENT AND ADD TO WATCHED ELEMENTS
+        if(watchedElements[0].revents & POLLIN) {
+            cout << "NEW event happened" << endl;
+            addNewClientToWatchedList(main_socket);
+            cout << "TOTAL clients: " << totalClients-1 << endl;
+        }
+
+        //CHECK EACH ELEMENT IN LIST TO SEE IF THERE IS SOMETHING TO READ
+        checkClientListForSomethingToRead();
+
+        //TO DO: REMOVE ELEMENT FROM ARRAY WHEN CONEXION CLOSES2
+    }
+
+    close(client);
+    close(main_socket);
+    return 0;
+}
+
+void setServerSocket() {
     listeningPort.sin6_family = AF_INET6;
     listeningPort.sin6_port = htons(SERVER_PORT);
     listeningPort.sin6_addr = in6addr_any;
 }
 
-void set_watched_array(int main_socket) {
-    watchedElements[0].fd  = main_socket;
-    watchedElements[0].events = POLLIN;
-    watchedElements[0].revents = 0;
+void initializeLists() {
+    for(int i = 1; i < BACKLOG_CLIENTS+1; i++){
+        clientList[i] = nullptr;
+    }
+    for(int i = 0; i < BACKLOG_CLIENTS/2; i++){
+        salas[i] = nullptr;
+    }
 }
 
 int bindClient(int socket) {
@@ -68,29 +188,30 @@ int listenForClient(int socket) {
     return res;
 }
 
-void sendDataToClient(int client, char* buffer) {
-    //TRY SENDING DATA
-    cout <<"Sending data to client" << client << endl;
-    send(client, buffer,(int)strlen(buffer),0);
+void setWatchedArray(int main_socket) {
+    watchedElements[0].fd  = main_socket;
+    watchedElements[0].events = POLLIN;
+    watchedElements[0].revents = 0;
+
+    Client* new_client_connection = new Client();
+    new_client_connection->fd = main_socket;
+    new_client_connection->username[0] = 0;
+    //estado
+
+    clientList[0] = new_client_connection;
 }
 
-void addClientToSala() {
-
-    if((historyClient%2) == 0) {
-        numeroSala++;
-        cout << "Creando nueva sala " << numeroSala << endl;
-        salaDeCliente[totalClients-1] = numeroSala;
-    } else {
-        cout << "Agregando cliente a sala " << numeroSala << endl;
-        salaDeCliente[totalClients-1] = numeroSala;
-    }
-    for(int i = 0; i < 6; i++){
-        cout << salaDeCliente[i] << ", ";
-    }
-    cout << endl;
+void addNewClientToWatchedList(int main_socket) {
+    acceptClient(main_socket);
 }
 
 int acceptClient(int socket) {
+    //CAN ACCEPT MORE CLIENTS?
+    if(totalClients >= BACKLOG_CLIENTS){
+        cout << "ERROR: Can not accept more clients, server is full" << endl;
+        return -1;
+    }
+
     int new_client = accept(socket, nullptr, nullptr);
 
     if(new_client < 0) {
@@ -98,73 +219,106 @@ int acceptClient(int socket) {
         return -1;
     }
 
-    watchedElements[totalClients].fd  = new_client;
-    watchedElements[totalClients].events = POLLIN;
-    watchedElements[totalClients].revents = 0;
-
-    cout << "New client " << new_client << " accepted" << endl;
-    for(int i = 0; i < 6; i++){
-        cout << salaDeCliente[i] << ", ";
-    }
-    cout << endl;
-    addClientToSala();
-    totalClients++;
-    historyClient++;
+    addClient(new_client);
 
     return new_client;
 }
-/*
-void managePackageTypeZero(int sizeOfName, string name, int client){
-    int clientIndex, oponentIndex;
-    for(int i = 0; i < totalClients; i++){
-        if(watchedElements[i] == client){
-            clientIndex = i;
-            break;
-        }
-    }
 
-    int sala = salaDeCliente[clientIndex-1];
-    cout << "La sala del cliente es: " << sala << endl;
-    for(int i = 0; i < totalClients; i++){
-        if(salaDeCliente[i] == sala){
-            oponentIndex = i+1;
-        }
-    }
-    int oponent = watchedElements[oponentIndex];
-    sendDataToClient(oponent, name.c_str());
-}*/
+void addClient(int new_client){
+    Client* new_client_connection = new Client();
 
-void processDataRecieved(string buffer, int client){
-    char newBuffer[1024];
-    strcpy(newBuffer, buffer.c_str());
-    cout << "Buffer es: " << newBuffer << endl;
+    watchedElements[totalClients].fd  = new_client;
+    watchedElements[totalClients].events = POLLIN;
+    watchedElements[totalClients].revents = 0;
+    
+    new_client_connection->fd = new_client;
+    new_client_connection->username[0] = 0;
+    new_client_connection->name_length = 0;
+    new_client_connection->team = -1;
+    new_client_connection->state = STATE_INITIAL_CONNECTION;
 
-    char typeOfPackage, lengthOfName, rsvd;
-    string nameOfUser;
-    int lengthOfNameInt;
+    clientList[totalClients] = new_client_connection;
+    cout << "---> NEW CLIENT: " << new_client << " accepted..." << endl;
 
-    typeOfPackage = newBuffer[0];
-    rsvd = newBuffer[1];
-    lengthOfName = newBuffer[2];
-    lengthOfNameInt = lengthOfName - '0';
-    rsvd = newBuffer[3];
+    totalClients++;
+    historyClient++;
+}
 
-    for(int i = 4; i < 4+lengthOfNameInt; i++){
-        nameOfUser += buffer[i];
-    }
-    cout << "Name of client " << client << " is: " << nameOfUser << endl;
-
-    if(typeOfPackage == '0'){
-        //managePackageTypeZero(lengthOfNameInt, nameOfUser, client);
+void addClientToSala(Client* c) {  
+    if(((totalClients)%2) == 0) {
+        addWhiteToNewGame(c);
+        conectionToGame(c);
+    } else {
+        addBlackToExistingGame(c);
+        conectionToGame(c);
+        startGame(c->sala->white, c);
+        startGame(c, c->sala->white);
     }
 }
 
-int readSocket(int client) {
-    char *buffer = new char[1024];
-    int res = recv(client, buffer, sizeof(buffer),0);
+void addWhiteToNewGame(Client* c){
+    Game* sala = new Game();
+
+    sala->white = c;
+    sala->white->team = 1;
+    sala->white->state = STATE_WAITING_IN_GAME;
+
+    sala->num_sala = historySala;
+    sala->black = nullptr;
+
+    salas[numeroSala] = sala;
+    c->sala = sala;
+    cout << "<<< NEW GAME: " << sala->num_sala << " and adding client " << c->fd << ">>>" << endl;
+}
+
+void addBlackToExistingGame(Client* c){
+    salas[numeroSala]->black = c;
+    salas[numeroSala]->white->state = STATE_PLAYING_GAME;
+    salas[numeroSala]->black->state = STATE_PLAYING_GAME;
+    salas[numeroSala]->black->team = 0;
+
+    c->sala = salas[numeroSala];
+
+    cout << "EXISTING GAME: " << salas[numeroSala]->num_sala  << " adding client " << c->fd << endl;
+    numeroSala++;
+    historySala++;
+}
+
+void sendDataToClient(int client, char* buffer) {
+    //TRY SENDING DATA
+    cout <<"SENDING data:" << buffer << " to client " << client << endl;
+    int size_buffer;
+    if(buffer[0] == 1){
+        size_buffer = 3;
+    }
+
+    send(client, buffer,size_buffer,0);
+}
+
+void checkClientListForSomethingToRead() {
+    //cout << "Checking list for something to read" << endl;
+    Client* client = new Client();
+    int closeClient;
+    for(int i = 0; i < totalClients; i++) {
+        if((watchedElements[i].revents &POLLIN) != 0) {
+            client = clientList[i];
+            if(readSocket(client) == 0) { //cierre de conexion
+                closeClientConnection(i);
+            }
+            watchedElements[i].revents = 0;
+        }
+    }
+}
+
+int readSocket(Client* client) {
+    int buffer_size = 1024;
+    char *buffer = new char[buffer_size];
+
+    int res = recv(client->fd, buffer, buffer_size, 0);
     string buffer1 = buffer;
+    
     if(res < 0) {
-        cout << "ERROR: Could not receive data from client " << client << endl;
+        cout << "ERROR: Could not receive data from client " << client->fd << endl;
         return -1;
     } else if(res > 0) {
         cout << "Data received: " << buffer << endl;
@@ -174,130 +328,177 @@ int readSocket(int client) {
         bzero((char*)&buffer,sizeof(buffer));
         return 1;
     } else if(res == 0) {
-        cout << "Se cerro cliente" << client << endl;
         return 0;
     }
 }
 
-void closeClientConnection(int);
+void processDataRecieved(string buffer, Client* client){
+    char newBuffer[1024];
+    strcpy(newBuffer, buffer.c_str());
 
-void closeGameConnection(int sala) {
-
-    int oponentIndexInWatchedElements, oponent_fd;
-
-    oponentIndexInWatchedElements = -1;
-
-    for(int i = 0; i < 6; i++) {
-        if(salaDeCliente[i] == sala) {
-            oponentIndexInWatchedElements = i+1;
-            oponent_fd = watchedElements[oponentIndexInWatchedElements].fd;
-            cout << "The oponent is " << oponent_fd << endl;
-        }
+    char type_package = newBuffer[0];
+    //FIX REMOVE ''
+    if(type_package == '0'){ //READ USERNAME 
+        readUsernamePackage(client, buffer);
+        addClientToSala(client);
     }
-    if(oponentIndexInWatchedElements > 0) {
-        char* buffer = "Your oponent left.. closing connection";
-        sendDataToClient(oponent_fd, buffer);
-        closeClientConnection(oponentIndexInWatchedElements);
+    if(int(type_package) == 1){
+        readChesspieceMovement(client, buffer);
     }
-    for(int i = 0; i < 6; i++){
-        cout << salaDeCliente[i] << ", ";
-    }
-    cout << endl;
 }
 
 void closeClientConnection(int client_index) {
-    for(int i = 0; i < 6; i++){
-        cout << salaDeCliente[client_index-1] << ", ";
-    }
-    cout << endl;
-    int sala = salaDeCliente[client_index-1];
-    cout << "Sala del cliente es " << sala;
+    Game* sala = new Game();
+    Client* oponent = new Client();
 
-    cout << "Client " << watchedElements[client_index].fd << " closed connection" << endl;
-    if(totalClients == 1) {
+    if(totalClients-1 == 1) {
         close(watchedElements[client_index].fd);
         totalClients--;
-        salaDeCliente[0] = 0;
-    } else {
+        cout << "--x CLOSED connection of client " << watchedElements[client_index].fd << endl;
+
+        delete salas[0];
+        salas[0] = nullptr;
+    } 
+    else {
+        sala = searchForClientsGame(watchedElements[client_index].fd);
+
         close(watchedElements[client_index].fd);
+        cout << "--x CLOSED connection of client " << watchedElements[client_index].fd << endl;
+
+        if(sala->white == clientList[client_index]){
+            oponent = sala->black;
+        } else{
+            oponent = sala->white;
+        }
 
         watchedElements[client_index].fd  = watchedElements[totalClients-1].fd;
         watchedElements[client_index].events =  watchedElements[totalClients-1].events;
         watchedElements[client_index].revents = watchedElements[totalClients-1].revents;
+        delete clientList[client_index];
+        clientList[client_index] = clientList[totalClients-1];
 
-        salaDeCliente[client_index-1] = salaDeCliente[totalClients-1];
-        salaDeCliente[totalClients-1] = 0;
         totalClients--;
+        closeOpponentConnection(oponent);
         closeGameConnection(sala);
+
+    }
+}
+
+void closeOpponentConnection(Client* oponent){
+    int oponent_index = searchForClientInList(oponent->fd);
+    
+    char* buffer = "Your oponent left.. closing connection";
+    sendDataToClient(oponent->fd, buffer);
+    if(totalClients-1 == 1) {
+        close(watchedElements[oponent_index].fd);
+    } 
+    else{
+        watchedElements[oponent_index].fd  = watchedElements[totalClients-1].fd;
+        watchedElements[oponent_index].events =  watchedElements[totalClients-1].events;
+        watchedElements[oponent_index].revents = watchedElements[totalClients-1].revents;
     }
 
-    //TO DO: DELETE OTHER CLIENT IN SALA
+    cout << "--x CLOSED connection to opponent " << oponent->fd << endl;
+    
+    totalClients--;
+    delete clientList[oponent_index];
+    clientList[oponent_index] = clientList[totalClients-1];
 }
 
-void addNewClientToWatchedList(int main_socket) {
-    acceptClient(main_socket);
-    sendDataToClient(watchedElements[totalClients-1].fd, "Welcome to ChessWorld!");
+void closeGameConnection(Game* sala) {
+    int num_sala = sala->num_sala;
+    int sala_index = searchForSalaInList(sala);
+
+    delete salas[sala_index];
+    salas[sala_index] = nullptr;
+    
+    if(sala_index != 0){
+        salas[sala_index] = salas[numeroSala];
+    }
+    numeroSala--;
+    cout << "xxx CLOSED GAME " << num_sala << " xxx"<< endl;
 }
 
-void checkClientListForSomethingToRead() {
-    //cout << "Checking list for something to read" << endl;
-    int client;
-    int closeClient;
-    for(int i = 0; i < totalClients; i++) {
-        if((watchedElements[i].revents &POLLIN) != 0) {
-            client = watchedElements[i].fd;
-            if(readSocket(client) == 0) { //cierre de conexion
-                closeClientConnection(i);
-            }
-            watchedElements[i].revents = 0;
+Game* searchForClientsGame(int c){
+    for(int i = 0; i < numeroSala; i++){
+        if(salas[i]->white->fd == c || salas[i]->black->fd == c){
+            return salas[i];
+        }
+    }
+    return nullptr;
+}
+
+int searchForClientInList(int fd){
+    for(int i = 1; i < totalClients; i++){
+        if(clientList[i]->fd == fd){
+            return i; 
         }
     }
 }
 
-int main(int argc, char* argv[]) {
-    int main_socket, res, client;
-
-    //START
-    set_server_socket();
-
-    //TODO: RESOLUCION DNS
-
-    main_socket = socket(AF_INET6, SOCK_STREAM, 0);
-    if(main_socket < 0) {
-        cout << "ERROR: Could no create main socket" << endl;
-        return -1;
-    }
-
-    //try to bind the socket to the addres and port number
-    bindClient(main_socket);
-
-    //try to listen
-    listenForClient(main_socket);
-
-    while(1) {
-        set_watched_array(main_socket);
-
-        res = poll(watchedElements, totalClients, 100);
-        if(res < 0) {
-            cout << "ERROR: Poll could not be done properly" << endl;
-            return -1;
+int searchForSalaInList(Game* sala){
+    for(int i = 0; i < numeroSala; i++){
+        if(salas[i]->num_sala == sala->num_sala){
+            return i;
         }
-
-        //ACCEPT CLIENT AND ADD TO WATCHED ELEMENTS
-        if(watchedElements[0].revents & POLLIN) {
-            cout << "New event happened" << endl;
-            addNewClientToWatchedList(main_socket);
-        }
-
-        //CHECK EACH ELEMENT IN LIST TO SEE IF THERE IS SOMETHING TO READ
-        checkClientListForSomethingToRead();
-
-        //TO DO: REMOVE ELEMENT FROM ARRAY WHEN CONEXION CLOSES2
     }
-
-    close(client);
-    close(main_socket);
-    return 0;
 }
 
+//Packages
+void readUsernamePackage(Client* client, string buffer){
+    cout << "READING package username" << endl;
+    char newBuffer[1024];
+    strcpy(newBuffer, buffer.c_str());
 
+    int lengthOfName = int(newBuffer[1]);
+
+    for(int i = 2; i < 2+lengthOfName; i++){
+        client->username[i-2] += buffer[i];
+    }
+    client->name_length = lengthOfName;
+
+    cout << "Length of name: " << client->name_length << " Name: " << client->username << endl;
+}
+
+void readChesspieceMovement(Client* client, string str_buffer){
+    cout << "READING package chesspiece movement" << endl;
+    char buffer[3];
+    strcpy(buffer, str_buffer.c_str());
+
+    int chesspiece = int(buffer[1]);
+    int movement = int(buffer[2]);
+
+    cout << "Chesspiece current position: " << chesspiece << " Moves to: " << movement << endl;
+}
+
+void conectionToGame(Client* client){
+    char package[3];
+    package[0] = 1; //Type
+    package[1] = client->sala->num_sala; //numero sala
+    
+    //white or black
+    if(client->team == 1){
+        package[2] = 1;
+    }
+    else{
+        package[2] = 0;
+    }
+    cout << "Package type: " << int(package[0]) << " num_sala " << int(package[1]) << ", white/black " << int(package[2]) << endl;
+    sendDataToClient(client->fd, package);
+}
+
+void startGame(Client* client, Client* oponent){
+    cout << "Starting game package" << endl;
+    int len_name = oponent->name_length;
+    char package[3+len_name];
+
+    package[0] = 2; //Type
+    package[1] = oponent->name_length; //oponents name length
+
+    for(int i = 0; i < oponent->name_length; i++){
+        package[2+i] = oponent->username[i]; 
+    }
+
+    cout << "Sending to " << client->username << ". Opponent information sent: Length: " << int(package[1]) << " name: " << oponent->username << endl;
+    sendDataToClient(client->fd, package);
+}
