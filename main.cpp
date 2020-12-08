@@ -98,6 +98,7 @@ void conectionToGame(Client*);
 void startGame(Client*, Client*);
 void readUsernamePackage(Client*, string);
 void readChesspieceMovement(Client*, string);
+void sendChesspieceMovement(Client*, int, int);
 
 int main(int argc, char* argv[]) {
     int main_socket, res, client;
@@ -251,8 +252,8 @@ void addClientToSala(Client* c) {
     } else {
         addBlackToExistingGame(c);
         conectionToGame(c);
-        startGame(c->sala->white, c);
-        startGame(c, c->sala->white);
+        startGame(c->sala->white, c->sala->black);
+        startGame(c->sala->black, c->sala->white);
     }
 }
 
@@ -279,7 +280,7 @@ void addBlackToExistingGame(Client* c){
 
     c->sala = salas[numeroSala];
 
-    cout << "EXISTING GAME: " << salas[numeroSala]->num_sala  << " adding client " << c->fd << endl;
+    cout << " <<< EXISTING GAME: " << salas[numeroSala]->num_sala  << " adding client " << c->fd << " >>>" << endl;
     numeroSala++;
     historySala++;
 }
@@ -291,8 +292,15 @@ void sendDataToClient(int client, char* buffer) {
     if(buffer[0] == 1){
         size_buffer = 3;
     }
+    else if (buffer[0] == 2){
+        size_buffer = 2 + int(buffer[1]);
+        cout << size_buffer << endl;
+    }
+    else if (buffer[0] == 4){
+        size_buffer = 3;
+    }
 
-    send(client, buffer,size_buffer,0);
+    send(client, buffer, size_buffer, 0);
 }
 
 void checkClientListForSomethingToRead() {
@@ -342,7 +350,7 @@ void processDataRecieved(string buffer, Client* client){
         readUsernamePackage(client, buffer);
         addClientToSala(client);
     }
-    if(int(type_package) == 1){
+    if(int(type_package) == 3){
         readChesspieceMovement(client, buffer);
     }
 }
@@ -351,13 +359,16 @@ void closeClientConnection(int client_index) {
     Game* sala = new Game();
     Client* oponent = new Client();
 
-    if(totalClients-1 == 1) {
+    if((totalClients-1) % 2 == 1) {
+        cout << "Closed connection without oponent" << endl;
         close(watchedElements[client_index].fd);
         totalClients--;
         cout << "--x CLOSED connection of client " << watchedElements[client_index].fd << endl;
 
-        delete salas[0];
-        salas[0] = nullptr;
+        int sala_index = searchForSalaInList(clientList[client_index]->sala);
+        cout << "Numero de sala " << numeroSala << endl;
+        delete salas[sala_index];
+        salas[sala_index] = nullptr;
     } 
     else {
         sala = searchForClientsGame(watchedElements[client_index].fd);
@@ -389,7 +400,7 @@ void closeOpponentConnection(Client* oponent){
     
     char* buffer = "Your oponent left.. closing connection";
     sendDataToClient(oponent->fd, buffer);
-    if(totalClients-1 == 1) {
+    if((totalClients-1) % 2 == 1) {
         close(watchedElements[oponent_index].fd);
     } 
     else{
@@ -469,6 +480,22 @@ void readChesspieceMovement(Client* client, string str_buffer){
     int movement = int(buffer[2]);
 
     cout << "Chesspiece current position: " << chesspiece << " Moves to: " << movement << endl;
+    sendChesspieceMovement(client, chesspiece, movement);
+}
+
+void sendChesspieceMovement(Client* client_moved, int chesspiece, int movement){
+    int opponent_fd;
+    char buffer[3];
+    if(client_moved->team == 1){
+        opponent_fd = client_moved->sala->black->fd;
+    }
+    else{
+        opponent_fd = client_moved->sala->white->fd;
+    }
+    buffer[0] = 4;
+    buffer[1] = chesspiece;
+    buffer[2] = movement;
+    sendDataToClient(opponent_fd, buffer);
 }
 
 void conectionToGame(Client* client){
