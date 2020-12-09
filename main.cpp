@@ -99,6 +99,8 @@ void startGame(Client*, Client*);
 void readUsernamePackage(Client*, string);
 void readChesspieceMovement(Client*, string);
 void sendChesspieceMovement(Client*, int, int);
+void readChatMessage(Client*, string);
+void bounceRematch(Client*, string);
 
 int main(int argc, char* argv[]) {
     int main_socket, res, client;
@@ -299,6 +301,13 @@ void sendDataToClient(int client, char* buffer) {
     else if (buffer[0] == 4){
         size_buffer = 3;
     }
+    else if(buffer[0] == 5){
+        size_buffer = 2;
+    }
+    else if(buffer[0] == 9){
+        size_buffer = 2 + int(buffer[1]);
+        cout << "Package message size: " << size_buffer << endl;
+    }
 
     send(client, buffer, size_buffer, 0);
 }
@@ -352,6 +361,12 @@ void processDataRecieved(string buffer, Client* client){
     }
     if(int(type_package) == 3){
         readChesspieceMovement(client, buffer);
+    }
+    if(int(type_package) == 5){
+        bounceRematch(client, buffer);
+    }
+    if(int(type_package) == 9){
+        readChatMessage(client, buffer);
     }
 }
 
@@ -528,4 +543,44 @@ void startGame(Client* client, Client* oponent){
 
     cout << "Sending to " << client->username << ". Opponent information sent: Length: " << int(package[1]) << " name: " << oponent->username << endl;
     sendDataToClient(client->fd, package);
+}
+
+void readChatMessage(Client* client, string str_buffer){
+    cout << "READING package chat message" << endl;
+    char buffer[1024];
+    char chat[254];
+    strcpy(buffer, str_buffer.c_str());
+
+    int lengthOfMsg = int(buffer[1]);
+
+    for(int i = 2; i < 2+lengthOfMsg; i++){
+        chat[i-2] += buffer[i];
+    }
+
+    cout << "Length of msg: " << lengthOfMsg << " Message: " << chat << endl;
+
+    if(client->team == 1 && client->sala->black != nullptr){
+        sendDataToClient(client->sala->black->fd, buffer);
+    } else if (client->team == 0 && client->sala->white != nullptr) {
+        sendDataToClient(client->sala->white->fd, buffer);
+    }
+}
+
+void bounceRematch(Client* client, string str_buffer){
+    cout << "READING package rematch" << endl;
+    char buffer[2];
+    strcpy(buffer, str_buffer.c_str());
+
+    int rematch = int(buffer[1]);
+    if(rematch == 1){
+        cout << "Client " << client->fd  << " accepted rematch" << endl;
+    } else{
+         cout << "Client " << client->fd  << " declined rematch" << endl;
+    }
+
+    if(client->team == 1 && client->sala->black != nullptr){
+        sendDataToClient(client->sala->black->fd, buffer);
+    } else if (client->team == 0 && client->sala->white != nullptr) {
+        sendDataToClient(client->sala->white->fd, buffer);
+    }
 }
