@@ -101,6 +101,7 @@ void readChesspieceMovement(Client*, string);
 void sendChesspieceMovement(Client*, int, int);
 void readChatMessage(Client*, string);
 void bounceRematch(Client*, string);
+void bounceError(Client*, string);
 
 int main(int argc, char* argv[]) {
     int main_socket, res, client;
@@ -304,6 +305,9 @@ void sendDataToClient(int client, char* buffer) {
     else if(buffer[0] == 5){
         size_buffer = 2;
     }
+    else if(buffer[0] == 8){
+        size_buffer = 2;
+    }
     else if(buffer[0] == 9){
         size_buffer = 2 + int(buffer[1]);
         cout << "Package message size: " << size_buffer << endl;
@@ -367,6 +371,9 @@ void processDataRecieved(string buffer, Client* client){
     }
     if(int(type_package) == 9){
         readChatMessage(client, buffer);
+    }
+    if(int(type_package) == 8){
+        bounceError(client, buffer);
     }
 }
 
@@ -575,8 +582,20 @@ void bounceRematch(Client* client, string str_buffer){
     if(rematch == 1){
         cout << "Client " << client->fd  << " accepted rematch" << endl;
     } else{
-         cout << "Client " << client->fd  << " declined rematch" << endl;
+        cout << "Client " << client->fd  << " declined rematch" << endl;
     }
+
+    if(client->team == 1 && client->sala->black != nullptr){
+        sendDataToClient(client->sala->black->fd, buffer);
+    } else if (client->team == 0 && client->sala->white != nullptr) {
+        sendDataToClient(client->sala->white->fd, buffer);
+    }
+}
+
+void bounceError(Client* client, string str_buffer){
+    cout << "READING ERROR PACKAGE" << endl;
+    char buffer[2];
+    strcpy(buffer, str_buffer.c_str());
 
     if(client->team == 1 && client->sala->black != nullptr){
         sendDataToClient(client->sala->black->fd, buffer);
